@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     51598,       1415]
-NotebookOptionsPosition[     50016,       1382]
-NotebookOutlinePosition[     50485,       1400]
-CellTagsIndexPosition[     50442,       1397]
+NotebookDataLength[     50604,       1390]
+NotebookOptionsPosition[     49022,       1357]
+NotebookOutlinePosition[     49491,       1375]
+CellTagsIndexPosition[     49448,       1372]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -995,14 +995,10 @@ Cell[BoxData[
     "L_", ",", "N_", ",", "modes_", ",", "\[Epsilon]Start_", ",", 
      "\[Epsilon]Steps_"}], "]"}], ":=", 
    RowBox[{"(*", 
-    RowBox[{
-     RowBox[{"MAIN", " ", 
-      RowBox[{"FUNCTION", ".", " ", "Produces"}], " ", "a", " ", "list", " ", 
-      "of", " ", "the", " ", "uroots"}], ",", " ", 
-     RowBox[{
-     "indexed", " ", "by", " ", "the", " ", "mode", " ", "numbers", " ", 
-      "giving", " ", "this", " ", 
-      RowBox[{"solution", "."}]}]}], "*)"}], "\[IndentingNewLine]", 
+    RowBox[{"MAIN", " ", 
+     RowBox[{"FUNCTION", ".", " ", "Produces"}], " ", "a", " ", "list", " ", 
+     "of", " ", "the", " ", 
+     RowBox[{"uroots", "."}]}], "*)"}], "\[IndentingNewLine]", 
    RowBox[{"Module", "[", 
     RowBox[{
      RowBox[{"{", 
@@ -1023,28 +1019,6 @@ Cell[BoxData[
        "The", " ", "list", " ", "of", " ", "epislon", " ", "values", " ", 
         "to", " ", "iterate", " ", "over"}], "*)"}], "\[IndentingNewLine]", 
       "\[IndentingNewLine]", 
-      RowBox[{"(*", 
-       RowBox[{
-        RowBox[{"stringsets", "=", 
-         RowBox[{"Catenate", "[", " ", 
-          RowBox[{"Table", "[", 
-           RowBox[{
-            RowBox[{"Table", "[", 
-             RowBox[{"i", ",", 
-              RowBox[{"{", 
-               RowBox[{"j", ",", 
-                RowBox[{"Mset", "[", 
-                 RowBox[{"[", "i", "]"}], "]"}]}], "}"}]}], "]"}], ",", 
-            RowBox[{"{", 
-             RowBox[{"i", ",", 
-              RowBox[{"Length", "[", "Mset", "]"}]}], "}"}]}], "]"}], "]"}]}],
-         ";"}], "*)"}], 
-      RowBox[{"(*", 
-       RowBox[{"Alternative", ",", " ", 
-        RowBox[{
-        "if", " ", "we", " ", "supply", " ", "Mset", " ", "instead", " ", 
-         "of", " ", "stringsets"}]}], "*)"}], "\[IndentingNewLine]", 
-      "\[IndentingNewLine]", "\[IndentingNewLine]", 
       RowBox[{
        RowBox[{"BAElog", "[", 
         RowBox[{
@@ -1370,14 +1344,15 @@ Cell[BoxData[
         "]"}]}], ";", "\[IndentingNewLine]", "finalvalue"}]}], 
     "]"}]}]}]], "Input",
  CellChangeTimes->CompressedData["
-1:eJxTTMoPSmViYGCQAWIQ/Se+I+5g5ltHrZ1fwHTT6x8lIHqyW0IdiJ4Vdu3j
+1:eJxTTMoPSmViYGCQBWIQ/Se+I+5g5ltHrZ1fwHTT6x8lIHqyW0IdiJ4Vdu3j
 ESC9rzjgE4iuOL3b8BSQPnHyCJi+7lgWAKKVpv8NBtGpi6ynngPSZmd8wPQ8
 JbvFIFpl8trlINrAdfl6MP/71w0geteUmq0geuelfjDtZ/Lw70Mg/fbq2bBH
 IPfs540G0cat3Skgmq+ymecJkBbYFS0MoiVWnBYH0TG2X+VBdFEJhzGIluTh
 NQPRbN3aHiC6/aORH4jmuBgRCqI952dGgehvQZvjweJ2zytB9JVMjToQ7WvV
 1gmir71q6wXRN/+G94HoHMbUSSDajbt6AYie/c9iDYgWTDkOpne9W7gJRP/4
 obgd7K6cWYdB9DEd3VNgebM5j0B013qdFyBat+LDhRdAWvhP6iUQ/SROet1r
-kP+UIsF0whnTUyDay8n+LIi2OcZ3BUS7GXp+AtEAB7f6+g==
+kP+UIsF0whnTUyDay8n+LIi2OcZ3BUS7GXp+AtE6kyeIvwHSms2GEiAaAPcX
+Ams=
   "],ExpressionUUID->"f4752db9-2e26-4c3c-aa96-edb36b515585"]
 },
 WindowSize->{1152., 579.6},
@@ -1416,7 +1391,7 @@ Cell[32711, 956, 271, 5, 23, "Output",ExpressionUUID->"98a8b1d4-c4fb-4b60-9a3d-7
 Cell[32985, 963, 254, 4, 23, "Output",ExpressionUUID->"dae23126-13a0-4fb8-89aa-bff4d62488e0"],
 Cell[33242, 969, 254, 4, 23, "Output",ExpressionUUID->"aca4abef-c15a-4698-bd75-7102e458a991"]
 }, Open  ]],
-Cell[33511, 976, 16501, 404, 486, "Input",ExpressionUUID->"f4752db9-2e26-4c3c-aa96-edb36b515585"]
+Cell[33511, 976, 15507, 379, 446, "Input",ExpressionUUID->"f4752db9-2e26-4c3c-aa96-edb36b515585"]
 }
 ]
 *)
