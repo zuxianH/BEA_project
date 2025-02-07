@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     44291,       1063]
-NotebookOptionsPosition[     43379,       1041]
-NotebookOutlinePosition[     43814,       1058]
-CellTagsIndexPosition[     43771,       1055]
+NotebookDataLength[    136094,       3538]
+NotebookOptionsPosition[    134815,       3510]
+NotebookOutlinePosition[    135284,       3528]
+CellTagsIndexPosition[    135241,       3525]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -241,8 +241,8 @@ Cell[BoxData[
     RowBox[{"Module", "[", 
      RowBox[{
       RowBox[{"{", 
-       RowBox[{"Ms", ",", "Mmatrices", ",", "UpdMmatrices"}], "}"}], ",", 
-      "\[IndentingNewLine]", 
+       RowBox[{"Ms", ",", "Mmatrices", ",", "UpdMmatrices", ",", "M"}], "}"}],
+       ",", "\[IndentingNewLine]", 
       RowBox[{
        RowBox[{"Ms", "=", 
         RowBox[{"Delete", "[", 
@@ -408,9 +408,9 @@ Cell[BoxData[
    3.9478479977041063`*^9, 3.947848001650668*^9}, 3.9479110842996545`*^9, {
    3.947911981415693*^9, 3.9479119859764705`*^9}, {3.9479123463890986`*^9, 
    3.9479124125986767`*^9}, {3.9479124438269844`*^9, 3.947912449033117*^9}, {
-   3.9479125196952085`*^9, 3.94791267158611*^9}},
- CellLabel->
-  "In[150]:=",ExpressionUUID->"fa287d81-6f12-4b33-9319-8c884189d2c8"],
+   3.9479125196952085`*^9, 3.94791267158611*^9}, {3.9479314567090764`*^9, 
+   3.9479314569434557`*^9}},ExpressionUUID->"fa287d81-6f12-4b33-9319-\
+8c884189d2c8"],
 
 Cell[BoxData[
  RowBox[{"\[IndentingNewLine]", 
@@ -515,12 +515,266 @@ Cell[BoxData[
    3.9477778532939234`*^9}, {3.947777997142668*^9, 3.947777997475065*^9}, {
    3.94777808969818*^9, 3.947778091478801*^9}, {3.9477782142358675`*^9, 
    3.947778220635692*^9}, {3.947912985966077*^9, 3.9479129866776967`*^9}, {
-   3.9479179359912415`*^9, 3.9479179378155923`*^9}},
+   3.9479179359912415`*^9, 3.9479179378155923`*^9}, {3.9479231149630537`*^9, 
+   3.9479231154161997`*^9}, {3.9479276463077374`*^9, 3.947927647396388*^9}, {
+   3.9479317290336137`*^9, 3.9479317302040863`*^9}, {3.9479330619536743`*^9, 
+   3.9479330629767857`*^9}, {3.9479334402178535`*^9, 3.9479334411809163`*^9}},
  CellLabel->
-  "In[276]:=",ExpressionUUID->"6a62968f-8a02-4471-8ee1-8760a59201e7"],
+  "In[549]:=",ExpressionUUID->"6a62968f-8a02-4471-8ee1-8760a59201e7"],
 
 Cell[BoxData[
- RowBox[{"\[IndentingNewLine]", "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"RiggedConfig", "[", "yd_", "]"}], ":=", "\[IndentingNewLine]", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"modes", "=", 
+        RowBox[{"ModesConfig", "[", "yd", "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"limits", "=", 
+        RowBox[{
+         RowBox[{"AdmissibleModes", "[", "yd", "]"}], "[", 
+         RowBox[{"[", "1", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"Prepend", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"Append", "[", 
+              RowBox[{"{", "}"}], "]"}], "/@", 
+             RowBox[{"(", 
+              RowBox[{
+               RowBox[{"Table", "[", 
+                RowBox[{
+                 RowBox[{"{", 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{"Table", "[", 
+                    RowBox[{
+                    RowBox[{"ConstantArray", "[", 
+                    RowBox[{"i", ",", 
+                    RowBox[{"Length", "[", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"m", ",", "p", ",", "j", ",", "i"}], "]"}], "]"}],
+                     "]"}]}], "]"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"i", ",", 
+                    RowBox[{"Sort", "[", 
+                    RowBox[{
+                    RowBox[{"Range", "[", 
+                    RowBox[{"Length", "[", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"m", ",", "p", ",", "j"}], "]"}], "]"}], "]"}], 
+                    "]"}], ",", "Greater"}], "]"}]}], "}"}]}], "]"}], "//", 
+                    "Catenate"}], ",", 
+                   RowBox[{
+                    RowBox[{"Table", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"limits", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"m", ",", "j", ",", "i"}], "]"}], "]"}], "+", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"m", ",", "p", ",", "j", ",", "i", ",", "k"}], 
+                    "]"}], "]"}], "+", "1"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"i", ",", 
+                    RowBox[{"Sort", "[", 
+                    RowBox[{
+                    RowBox[{"Range", "[", 
+                    RowBox[{"Length", "[", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"m", ",", "p", ",", "j"}], "]"}], "]"}], "]"}], 
+                    "]"}], ",", "Greater"}], "]"}]}], "}"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"k", ",", 
+                    RowBox[{"Length", "[", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"m", ",", "p", ",", "j", ",", "i"}], "]"}], "]"}],
+                     "]"}]}], "}"}]}], "]"}], "//", "Catenate"}]}], "}"}], 
+                 ",", 
+                 RowBox[{"{", 
+                  RowBox[{"j", ",", 
+                   RowBox[{"Length", "[", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"m", ",", "p"}], "]"}], "]"}], "]"}]}], "}"}]}], 
+                "]"}], "//", "Transpose"}], ")"}]}], ",", 
+            RowBox[{"{", 
+             RowBox[{"ConstantArray", "[", 
+              RowBox[{"1", ",", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"AugmentedYoungD", "[", "yd", "]"}], "//", "First"}],
+                 "//", "First"}]}], "]"}], "}"}]}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"m", ",", 
+            RowBox[{"Length", "[", "modes", "]"}]}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"p", ",", 
+            RowBox[{"Length", "[", 
+             RowBox[{"modes", "[", 
+              RowBox[{"[", "m", "]"}], "]"}], "]"}]}], "}"}]}], "]"}], "//", 
+        "Catenate"}]}]}], "]"}]}], "*)"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"ModestoRiggedConfig", "[", "modes_", "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"Mmatrix", ",", "limits"}], "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"Mmatrix", "=", 
+       RowBox[{"PadRight", "[", 
+        RowBox[{"Append", "[", 
+         RowBox[{
+          RowBox[{"Prepend", "[", 
+           RowBox[{
+            RowBox[{"Table", "[", 
+             RowBox[{
+              RowBox[{"Length", "[", 
+               RowBox[{"modes", "[", 
+                RowBox[{"[", 
+                 RowBox[{"i", ",", "j"}], "]"}], "]"}], "]"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"i", ",", 
+                RowBox[{"Length", "[", "modes", "]"}]}], "}"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"j", ",", 
+                RowBox[{"Length", "[", 
+                 RowBox[{"modes", "[", 
+                  RowBox[{"[", "i", "]"}], "]"}], "]"}]}], "}"}]}], "]"}], 
+            ",", 
+            RowBox[{"SparseArray", "[", 
+             RowBox[{
+              RowBox[{"1", "->", "L"}], ",", "1"}], "]"}]}], "]"}], ",", 
+          RowBox[{"{", "0", "}"}]}], "]"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"limits", "=", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"Delete", "[", 
+            RowBox[{
+             RowBox[{"-", 
+              RowBox[{
+               RowBox[{"Cartan", "[", 
+                RowBox[{"Length", "[", "Mmatrix", "]"}], "]"}], ".", 
+               "Mmatrix", ".", 
+               RowBox[{"Kernel", "[", 
+                RowBox[{"Length", "[", 
+                 RowBox[{"Mmatrix", "[", 
+                  RowBox[{"[", "1", "]"}], "]"}], "]"}], "]"}]}]}], ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", "1", "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"-", "1"}], "}"}]}], "}"}]}], "]"}], "+", 
+           RowBox[{"Delete", "[", 
+            RowBox[{
+             RowBox[{"Mmatrix", "/.", 
+              RowBox[{"{", 
+               RowBox[{"0", "->", 
+                RowBox[{"{", "}"}]}], "}"}]}], ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", "1", "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"-", "1"}], "}"}]}], "}"}]}], "]"}]}], ")"}], "/", 
+         "2"}], "-", 
+        RowBox[{"1", "/", "2"}]}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"Prepend", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Append", "[", 
+          RowBox[{"{", "}"}], "]"}], "/@", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Table", "[", 
+                 RowBox[{
+                  RowBox[{"ConstantArray", "[", 
+                   RowBox[{"i", ",", 
+                    RowBox[{"Length", "[", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"j", ",", "i"}], "]"}], "]"}], "]"}]}], "]"}], 
+                  ",", 
+                  RowBox[{"{", 
+                   RowBox[{"i", ",", 
+                    RowBox[{"Sort", "[", 
+                    RowBox[{
+                    RowBox[{"Range", "[", 
+                    RowBox[{"Length", "[", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "]"}], "]"}], ",", 
+                    "Greater"}], "]"}]}], "}"}]}], "]"}], "//", "Catenate"}], 
+               ",", 
+               RowBox[{
+                RowBox[{"Table", "[", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"limits", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"j", ",", "i"}], "]"}], "]"}], "+", 
+                   RowBox[{"modes", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"j", ",", "i", ",", "k"}], "]"}], "]"}], "+", 
+                   "1"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"i", ",", 
+                    RowBox[{"Sort", "[", 
+                    RowBox[{
+                    RowBox[{"Range", "[", 
+                    RowBox[{"Length", "[", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", "j", "]"}], "]"}], "]"}], "]"}], ",", 
+                    "Greater"}], "]"}]}], "}"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"k", ",", 
+                    RowBox[{"Length", "[", 
+                    RowBox[{"modes", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"j", ",", "i"}], "]"}], "]"}], "]"}]}], "}"}]}], 
+                 "]"}], "//", "Catenate"}]}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"j", ",", 
+               RowBox[{"Length", "[", "modes", "]"}]}], "}"}]}], "]"}], "//", 
+           "Transpose"}], ")"}]}], ",", 
+        RowBox[{"{", 
+         RowBox[{"ConstantArray", "[", 
+          RowBox[{"1", ",", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"AugmentedYoungD", "[", "yd", "]"}], "//", "First"}], "//",
+             "First"}]}], "]"}], "}"}]}], "]"}]}]}], "\[IndentingNewLine]", 
+    "]"}]}]}]], "Input",
+ CellChangeTimes->CompressedData["
+1:eJxTTMoPSmViYGAQAWIQ/apdNkA4661j0P+EEBAdwMoXDaJTvDTjQPS0cJMk
+EP3nFUMaiJ4X86cQRJsk+7eB6FJJpy4QneDT3Q2iN1n93gyipR4c2A2iMzJ1
+DoLotF4vMF1zVuoNiH6jXgSmO9xO/QHRP6z+guk9D7jZRIB0sYolD4jOc5sd
+DaLTyleC6X3mSxNAdIjEiiQQPeMfezWINipK6wLRvdyWfSC6gM2oH0T/uGcg
+KApyh9VVMRBdfldLBkSfcNKTBdEihydog2jLrmx9EH1gvrYziJ5x5FYIiJ5q
+khcLol9ZlIHpE381boNoM96TD0A0AENLjlY=
+  "],
+ CellLabel->
+  "In[542]:=",ExpressionUUID->"d2f1b732-11f2-499f-8877-ba8f4455fae5"],
+
+Cell[BoxData[
+ RowBox[{
   RowBox[{"(*", 
    RowBox[{
     RowBox[{
@@ -563,39 +817,6 @@ Cell[BoxData[
        RowBox[{
        "The", " ", "list", " ", "of", " ", "epislon", " ", "values", " ", 
         "to", " ", "iterate", " ", "over"}], "*)"}], "\[IndentingNewLine]", 
-      "\[IndentingNewLine]", 
-      RowBox[{"(*", 
-       RowBox[{
-        RowBox[{"modes", "[", 
-         RowBox[{"[", 
-          RowBox[{"1", ",", "1", ",", "1"}], "]"}], "]"}], " ", 
-        RowBox[{"(*", 
-         RowBox[{"n_", 
-          RowBox[{"1", "^", 
-           RowBox[{"(", "1", ")"}]}], 
-          RowBox[{"(", "1", ")"}]}], "*)"}], "\[IndentingNewLine]", 
-        RowBox[{"Length", "[", 
-         RowBox[{"modes", "[", 
-          RowBox[{"[", 
-           RowBox[{"1", ",", "1"}], "]"}], "]"}], "]"}], " ", 
-        RowBox[{"(*", 
-         RowBox[{"M_", 
-          RowBox[{"1", "^", 
-           RowBox[{"(", "1", ")"}]}]}], "*)"}], "\[IndentingNewLine]", 
-        RowBox[{"Sum", "[", 
-         RowBox[{
-          RowBox[{"i", "*", 
-           RowBox[{"Length", "[", 
-            RowBox[{"modes", "[", 
-             RowBox[{"[", 
-              RowBox[{"1", ",", "i"}], "]"}], "]"}], "]"}]}], ",", 
-          RowBox[{"{", 
-           RowBox[{"i", ",", 
-            RowBox[{"Length", "[", 
-             RowBox[{"modes", "[", 
-              RowBox[{"[", "1", "]"}], "]"}], "]"}]}], "}"}]}], "]"}]}], 
-       RowBox[{"(*", 
-        RowBox[{"M_", "1"}], "*)"}], "*)"}], "\[IndentingNewLine]", 
       "\[IndentingNewLine]", 
       RowBox[{
        RowBox[{"BAElog", "[", 
@@ -969,9 +1190,10 @@ Cell[BoxData[
    3.947914434087017*^9, 3.9479145639557657`*^9}, {3.9479148756670814`*^9, 
    3.947915024476903*^9}, {3.947915985157921*^9, 3.9479159904573393`*^9}, {
    3.9479162238606753`*^9, 3.947916244388218*^9}, {3.9479165583634987`*^9, 
-   3.947916558648797*^9}},
+   3.947916558648797*^9}, {3.94792089157059*^9, 3.947920892455244*^9}, {
+   3.9479233983093405`*^9, 3.9479234075872583`*^9}},
  CellLabel->
-  "In[267]:=",ExpressionUUID->"f4752db9-2e26-4c3c-aa96-edb36b515585"],
+  "In[543]:=",ExpressionUUID->"f4752db9-2e26-4c3c-aa96-edb36b515585"],
 
 Cell[CellGroupData[{
 
@@ -980,8 +1202,8 @@ Cell[BoxData[{
   RowBox[{
    RowBox[{"yd", "=", 
     RowBox[{"{", 
-     RowBox[{"2", ",", "2"}], "}"}]}], ";"}], "\[IndentingNewLine]", 
-  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+     RowBox[{"4", ",", "2", ",", "1"}], "}"}]}], ";"}], "\[IndentingNewLine]",
+   "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"L", "=", 
    RowBox[{"Total", "[", "yd", "]"}]}], ";"}], "\[IndentingNewLine]", 
@@ -996,7 +1218,13 @@ Cell[BoxData[{
     RowBox[{"urootsStringHypothesisSUN", "[", 
      RowBox[{"L", ",", "n", ",", "#", ",", 
       RowBox[{"1", "/", "100"}], ",", "99"}], "]"}], "&"}], "/@", 
-   RowBox[{"ModesConfig", "[", "yd", "]"}]}]}]}], "Input",
+   RowBox[{"(", 
+    RowBox[{"ModesConfig", "[", "yd", "]"}], ")"}], " ", 
+   RowBox[{"(*", 
+    RowBox[{"prints", " ", 
+     RowBox[{"v", "[", 
+      RowBox[{"k", ",", "a", ",", "s"}], "]"}], " ", "for", " ", "all", " ", 
+     "possible", " ", "mode", " ", "configurations"}], "*)"}]}]}]}], "Input",
  CellChangeTimes->{{3.9478480530381393`*^9, 3.9478481135132303`*^9}, {
   3.947854393822259*^9, 3.9478543950771675`*^9}, {3.9478729532744727`*^9, 
   3.9478729541060514`*^9}, {3.9478731415439143`*^9, 3.947873143101633*^9}, {
@@ -1004,44 +1232,2286 @@ Cell[BoxData[{
   3.9479078893739986`*^9}, {3.9479079935497885`*^9, 3.947907994852378*^9}, {
   3.9479156086596375`*^9, 3.9479156098386183`*^9}, {3.94791601288935*^9, 
   3.9479160137273583`*^9}, {3.9479166320757837`*^9, 3.947916632874753*^9}, {
-  3.9479179277477913`*^9, 3.947917950482149*^9}},
+  3.9479179277477913`*^9, 3.947917950482149*^9}, {3.947918419786951*^9, 
+  3.947918420454856*^9}, {3.947918540225809*^9, 3.9479185413465276`*^9}, {
+  3.947918996528353*^9, 3.947918998507778*^9}, {3.947919028888039*^9, 
+  3.9479190291536655`*^9}, {3.947919881076043*^9, 3.9479198973865767`*^9}, {
+  3.9479323457363634`*^9, 3.9479323502035074`*^9}, {3.9479334575152674`*^9, 
+  3.947933478710353*^9}},
  CellLabel->
-  "In[277]:=",ExpressionUUID->"18e01abc-35ac-48b4-950b-409b4e729008"],
+  "In[550]:=",ExpressionUUID->"18e01abc-35ac-48b4-950b-409b4e729008"],
 
 Cell[BoxData[
  RowBox[{"{", 
   RowBox[{
    RowBox[{"{", 
     RowBox[{
-     RowBox[{"v", "[", 
-      RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", "0"}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.7689323917791498`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      "0.36747033809370294`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.6351117072173341`"}]}], "}"}], ",", 
    RowBox[{"{", 
     RowBox[{
      RowBox[{
       RowBox[{"v", "[", 
        RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
-      "0.2886751345948127`"}], ",", 
+      "0.8892870767971273`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.16240599241551287`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.5387227203929139`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.9364947686699178`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.7315596533822732`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.38047662798585413`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.18066902019454997`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      "0.6142867686818404`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.3252082696903133`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.3032443043096895`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.0966774525900405`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.16993705200977943`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.3491423361639793`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6982846723279582`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", "0"}]}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.07006336327795071`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      "0.6666906111211381`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.17552129485507878`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", "0"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", "0"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", "0"}]}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.07006336327795079`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6666906111211378`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.17552129485507875`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.3491423361639793`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      "0.6982846723279584`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", "0"}]}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.3032443043096895`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      "0.09667745259004062`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.16993705200977943`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.18066902019455`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6142867686818408`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.32520826969031363`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.9364947686699175`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      "0.731559653382273`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.380476627985854`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.889287076797128`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      "0.1624059924155129`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.5387227203929146`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.76893239177915`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "2"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.36747033809370305`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6351117072173342`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.8660254037844376`"}], ",", 
      RowBox[{
       RowBox[{"v", "[", 
        RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
-      RowBox[{"-", "0.28867513459481275`"}]}]}], "}"}]}], "}"}]], "Output",
- CellChangeTimes->{
-  3.947854534949358*^9, 3.9478728906248293`*^9, 3.9478730278705816`*^9, 
-   3.947873145050212*^9, {3.9478732628111305`*^9, 3.947873273395895*^9}, 
-   3.9478733711929827`*^9, 3.9478736984324245`*^9, 3.947873778063304*^9, 
-   3.9479078723979053`*^9, 3.947907998084634*^9, 3.947908571439005*^9, 
-   3.9479111310582833`*^9, 3.9479131274645095`*^9, 3.947913884550279*^9, 
-   3.9479141804374695`*^9, 3.947914504507703*^9, 3.947914569148962*^9, 
-   3.947914895939992*^9, 3.947915043572195*^9, 3.9479156113668766`*^9, {
-   3.947915994440401*^9, 3.9479160154098835`*^9}, 3.947916264566837*^9, 
-   3.947916577942384*^9, 3.9479166468025837`*^9, 3.9479179522300935`*^9},
+      "0.2886751345948129`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", "0"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.7698003589195003`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.6391728289004622`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.1814843608197206`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.06697106003369177`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.10388066463614669`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.8852196390373817`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.3076241831453051`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.26425603936136266`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.7493497947185636`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.6581102105108148`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.18484701761406175`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.3435354946240406`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.24221370708370318`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.9138563964250561`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.3333170412251537`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.7534979660000369`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.7321197144997932`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.680992587201855`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.18925907023857275`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.9242861120359546`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.5737244616845706`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.8961011688934006`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.03363960881072976`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.24513428331862494`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.6769023358410444`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.692148197369633`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.061742271577201455`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.34055835050560135`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.3258486081282565`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.9192016689084415`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.058255949121454945`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.7206004225273386`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.6402358337140842`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.7206004225273381`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.05825594912145498`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.9192016689084413`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6402358337140842`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.9242861120359543`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.1892590702385728`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6809925872018551`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.5737244616845703`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.7534979660000368`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.3333170412251537`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.9138563964250569`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.7321197144997938`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.3240650686410931`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.04146080591400194`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.23136672687485746`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.37493887808634574`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.23136672687485765`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.04146080591400196`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.3240650686410932`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.37493887808634596`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.3405583505056013`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.06174227157720124`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6921481973696335`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.3258486081282563`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.24513428331862488`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.03363960881072976`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.8961011688934011`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6769023358410446`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.34353549462404065`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.18484701761406194`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6581102105108143`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.24221370708370318`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.26425603936136244`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.30762418314530515`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.8852196390373815`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.7493497947185639`"}]}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      "0.06697106003369174`"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.18148436081972077`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.6391728289004623`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      "0.10388066463614638`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "1", ",", "1"}], "]"}], "\[Rule]", "0"}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"2", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.28867513459481287`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"3", ",", "1", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.8660254037844385`"}]}], ",", 
+     RowBox[{
+      RowBox[{"v", "[", 
+       RowBox[{"1", ",", "2", ",", "1"}], "]"}], "\[Rule]", 
+      RowBox[{"-", "0.7698003589195009`"}]}]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.9479334846684027`*^9, 3.9479334999633703`*^9}},
  CellLabel->
-  "Out[280]=",ExpressionUUID->"1d3cdeca-36c7-4f8b-a244-19703c489c7e"]
+  "Out[553]=",ExpressionUUID->"57bef2f8-2747-4d44-97a8-2a4e3cf0d045"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"showRC", "/@", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"ModestoRiggedConfig", "[", "#", "]"}], "&"}], "/@", 
+    RowBox[{"(", 
+     RowBox[{"ModesConfig", "[", 
+      RowBox[{"{", 
+       RowBox[{"4", ",", "2", ",", "1"}], "}"}], "]"}], ")"}]}], 
+   ")"}]}]], "Input",
+ CellChangeTimes->{{3.9479331437944155`*^9, 3.94793324245825*^9}, {
+  3.9479333475515413`*^9, 3.9479333528639374`*^9}, {3.9479335087965755`*^9, 
+  3.9479335099817505`*^9}},
+ CellLabel->
+  "In[554]:=",ExpressionUUID->"ddf93846-2cdb-4ee6-9790-326f31ec5db8"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "ed3e63e7-10f0-4987-a51c-26510b930b1b"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "799c5812-18c2-4f8b-b2ad-3b3df4bc6ba4"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "cf6f3ebe-4d7a-4cd2-8d5e-3b9ed3484f6e"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "74e5af55-6d6a-46d5-a29c-94c6bfee2c76"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "5377927c-5341-4df0-bd4b-3da8cea2c2bd"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "f1c028c2-aceb-493f-a79a-c8fe3b00a9a9"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "2afcb5d1-fc33-4577-8cf0-2034d5f234c7"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "4b888bfd-3801-4f92-b7af-72beed171e08"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "adb060d5-2a88-42d3-8895-4c37bd573d8f"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "ed037b08-9153-46cc-be84-7da2c51096f0"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "21bbecc6-520a-4c78-9657-c82cac636e2d"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "ad3ee9f1-91d9-45f9-a689-7dc53544be8a"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "c28e1aa3-4ab8-43f3-8e34-7147c836f046"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "859e7b51-44be-47df-8597-41cdf92088d5"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 1}], 
+         RectangleBox[{2, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {3.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->44], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["0",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "b01c35c3-5637-49c5-85db-754ed38463bd"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "33bfd0a4-06b4-46d0-89a4-6bab7f17441a"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "2e9db60f-3eb4-4b51-9fdb-63021968dc58"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "14400212-17da-442f-a855-0fe3a101cdf7"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "a7d227f2-006a-435b-858f-f44bac6585bf"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "6a5d35f5-6e71-4c88-b0e4-6897e091075c"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "efb13e79-c05d-4ae9-9c3a-953bf7ee57fc"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "2cdabcac-13e6-4a0f-83d8-31c0e39ca634"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "13bdf320-9e00-4704-853c-f8e6278b28c0"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "65b1c7f7-37b2-40e4-9f42-8ac608cf8e76"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "46f0e529-6888-44e7-ae8e-846fdad3d1e2"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "c59098b6-a140-4897-b902-ce119975b2cf"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "975db590-451d-4e3a-ac1d-4ee3c8531399"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "09d40d51-0cac-414e-b481-6ea49fc307cd"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "d804a033-8c5d-4915-8fd5-07864fc412d5"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "2d7e15da-427a-4274-942f-4185013f8b27"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "60944a4b-ee59-4a53-af28-9dc1b91ad3cc"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "6c88f17d-ed18-427c-808f-9d142adf41f6"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "4717ce7f-e4e9-4766-a25c-7316f22fee7b"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "4f502e45-3524-42e8-9631-032fb7169445"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"], ",", 
+   TagBox[GridBox[{
+      {
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 2}], 
+         RectangleBox[{1, 1}], RectangleBox[{1, 0}], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 2.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 1.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["3",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 2.4}, Left], InsetBox[
+          StyleBox["4",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 1.4}, Left], InsetBox[
+          StyleBox["5",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       GraphicsBox[
+        {EdgeForm[Thickness[Tiny]], FaceForm[None], RectangleBox[{1, 0}], 
+         InsetBox[
+          StyleBox["1",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {0.6, 0.4}, Right], InsetBox[
+          StyleBox["2",
+           StripOnInput->False,
+           FontFamily->"Helvetica",
+           FontSize->12], {2.4, 0.4}, Left]},
+        ImageSize->32], 
+       InterpretationBox[Cell[BoxData[
+         FormBox["\[EmptySet]", TextForm]], "InlineText",ExpressionUUID->
+         "c64fe151-8ba6-4455-b695-935748ea0b77"],
+        Text[$CellContext`\[EmptySet]]]}
+     },
+     AutoDelete->False,
+     GridBoxAlignment->{"Columns" -> {{Automatic}}, "Rows" -> {{Top}}},
+     GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+    "Grid"]}], "}"}]], "Output",
+ CellChangeTimes->{{3.9479331501230116`*^9, 3.9479332157029023`*^9}, 
+   3.9479332506116486`*^9, 3.947933354233579*^9, 3.9479335122020626`*^9},
+ CellLabel->
+  "Out[554]=",ExpressionUUID->"e7376208-6552-4ace-ae02-d94a936b4324"]
 }, Open  ]]
 },
-WindowSize->{574.8, 573.6},
-WindowMargins->{{-4.8, Automatic}, {Automatic, 0}},
-Magnification:>0.7 Inherited,
+WindowSize->{1152., 579.6},
+WindowMargins->{{
+  Automatic, -5.399999999999864}, {-5.399999999999977, Automatic}},
+Magnification:>0.8 Inherited,
 FrontEndVersion->"13.1 for Microsoft Windows (64-bit) (August 22, 2022)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"85ad749f-ba90-45df-9175-0622aab792b1"
@@ -1057,13 +3527,18 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 3800, 114, 140, "Input",ExpressionUUID->"e760fa87-0f23-4082-89ae-24a6923a2645"],
-Cell[4361, 136, 11160, 276, 606, "Input",ExpressionUUID->"fa287d81-6f12-4b33-9319-8c884189d2c8"],
-Cell[15524, 414, 5241, 105, 185, "Input",ExpressionUUID->"6a62968f-8a02-4471-8ee1-8760a59201e7"],
-Cell[20768, 521, 19925, 452, 673, "Input",ExpressionUUID->"f4752db9-2e26-4c3c-aa96-edb36b515585"],
+Cell[558, 20, 3800, 114, 148, "Input",ExpressionUUID->"e760fa87-0f23-4082-89ae-24a6923a2645"],
+Cell[4361, 136, 11198, 276, 559, "Input",ExpressionUUID->"fa287d81-6f12-4b33-9319-8c884189d2c8"],
+Cell[15562, 414, 5501, 108, 176, "Input",ExpressionUUID->"6a62968f-8a02-4471-8ee1-8760a59201e7"],
+Cell[21066, 524, 9952, 249, 328, "Input",ExpressionUUID->"d2f1b732-11f2-499f-8877-ba8f4455fae5"],
+Cell[31021, 775, 18777, 420, 451, "Input",ExpressionUUID->"f4752db9-2e26-4c3c-aa96-edb36b515585"],
 Cell[CellGroupData[{
-Cell[40718, 977, 1365, 31, 100, "Input",ExpressionUUID->"18e01abc-35ac-48b4-950b-409b4e729008"],
-Cell[42086, 1010, 1277, 28, 33, "Output",ExpressionUUID->"1d3cdeca-36c7-4f8b-a244-19703c489c7e"]
+Cell[49823, 1199, 1966, 42, 114, "Input",ExpressionUUID->"18e01abc-35ac-48b4-950b-409b4e729008"],
+Cell[51792, 1243, 19454, 571, 270, "Output",ExpressionUUID->"57bef2f8-2747-4d44-97a8-2a4e3cf0d045"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[71283, 1819, 563, 15, 22, "Input",ExpressionUUID->"ddf93846-2cdb-4ee6-9790-326f31ec5db8"],
+Cell[71849, 1836, 62950, 1671, 130, "Output",ExpressionUUID->"e7376208-6552-4ace-ae02-d94a936b4324"]
 }, Open  ]]
 }
 ]
