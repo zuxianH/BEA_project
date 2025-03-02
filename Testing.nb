@@ -1,0 +1,91 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      2618,         83]
+NotebookOptionsPosition[      1966,         64]
+NotebookOutlinePosition[      2357,         80]
+CellTagsIndexPosition[      2314,         77]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{"SetDirectory", "[", 
+  RowBox[{"NotebookDirectory", "[", "]"}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"<<", "\"\<main_lazy_solver.m\>\""}]}], "Input",
+ CellChangeTimes->{{3.949932200954301*^9, 
+  3.949932201209745*^9}},ExpressionUUID->"7d6ed93b-7dc6-4ce5-9851-\
+e1e6a903ab2c"],
+
+Cell[BoxData["\<\"/home/zuxian/Documents/BAE_Project\"\>"], "Output",
+ CellChangeTimes->{3.949932116450055*^9},
+ CellLabel->"Out[2]=",ExpressionUUID->"181a9113-9e11-49f2-95a2-24ff5c4feebc"]
+}, Open  ]],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"yd", "=", 
+   RowBox[{"{", 
+    RowBox[{"4", ",", "2", ",", "1"}], "}"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"L", "=", 
+   RowBox[{"Total", "[", "yd", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"rigs", "=", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"ModestoRiggedConfig", "[", 
+      RowBox[{"L", ",", "#"}], "]"}], "&"}], "/@", 
+    RowBox[{"ModesConfig", "[", "yd", "]"}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"showRC", "/@", "rigs"}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"mySYT", "=", 
+   RowBox[{"ToSYT", "/@", "rigs"}]}], ";"}]}], "Input",ExpressionUUID->\
+"ed8f018d-51fe-4f8e-9146-f8fd7eb5b1d0"],
+
+Cell[BoxData[
+ RowBox[{"SolutionFromSYT", "[", 
+  RowBox[{"mySYT", "[", 
+   RowBox[{"[", "1", "]"}], "]"}], "]"}]], "Input",ExpressionUUID->"572fd96c-\
+5c8c-4162-a266-4012f95f9900"]
+},
+WindowSize->{719.25, 762},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"13.3 for Linux x86 (64-bit) (July 24, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"33fb1fec-45ed-4277-b5a8-b80b36600fb3"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 303, 6, 50, "Input",ExpressionUUID->"7d6ed93b-7dc6-4ce5-9851-e1e6a903ab2c"],
+Cell[886, 30, 189, 2, 33, "Output",ExpressionUUID->"181a9113-9e11-49f2-95a2-24ff5c4feebc"]
+}, Open  ]],
+Cell[1090, 35, 688, 21, 110, "Input",ExpressionUUID->"ed8f018d-51fe-4f8e-9146-f8fd7eb5b1d0"],
+Cell[1781, 58, 181, 4, 29, "Input",ExpressionUUID->"572fd96c-5c8c-4162-a266-4012f95f9900"]
+}
+]
+*)
+
