@@ -11,7 +11,7 @@ ClearAll["Global`*"]
 (*Parameter*)
 
 
-maxord=5; (* Number of orders in analytic 1/\[CapitalLambda] expansion of large \[Theta] solution. Generation of each next order is time-costly.  Roughly, the lower maxord is the bigger \[CapitalLambda]0 is needed *)
+(*maxord=5; (* Number of orders in analytic 1/\[CapitalLambda] expansion of large \[Theta] solution. Generation of each next order is time-costly.  Roughly, the lower maxord is the bigger \[CapitalLambda]0 is needed *)
 \[CapitalLambda]0=4; (* use analytic expressions as a solution guess for \[CapitalLambda]\[GreaterEqual]\[CapitalLambda]0. Large \[CapitalLambda] may need larger prec. May need \[CapitalLambda]0=4 for big systems *)
 prec=40; (* Precision to use in computations. If iteration step drops below 10^-6, try increasing precision. Until length 16 prec=40 should be ok, then need prec=80 sometimes. After length 20, need play more seriously with prec *)
 interpord=40; (* how many points from previous computations to take to guess the next step. Seriously affects convergence speed. Good values are between approx. 20 and 40 and depend on solution. *)
@@ -21,10 +21,10 @@ MyMaxIterations=12; (* Number of iterations before aborting attempts to converge
 base=2;pmin=3;RecoverySpeed=1/7;
 \[CapitalDelta]q=(base-1)Min[1,RecoverySpeed];(* step of iteration is computed as q/base^p and it is automatically adjusted: q\[Rule]q+\[CapitalDelta]q if converges fast; p\[Rule]p+1 if computation aborts; q\[Rule]1,p\[Rule]p-1 if q=base *)
 (* increase base and/or pmin if you want to reduce maximal allowed step *)
-\[CapitalLambda]target=1; (* when to terminate iteration *)
+\[CapitalLambda]target=1; (* when to terminate iteration *)*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Standard commands*)
 
 
@@ -96,7 +96,7 @@ PrintDone[x_]:=mPrint["...Done in: ",Timing[x][[1]],"s"];
 SetAttributes[PrintDone,HoldAll];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*GenerateQsystem*)
 
 
@@ -192,7 +192,7 @@ GenerateQsystem[\[Lambda]_] := Block[{},
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*showSYT*)
 
 
@@ -253,7 +253,7 @@ showSYT[\[Lambda]T_, "DOI"] := Graphics[
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*init\[Theta]rep*)
 
 
@@ -311,7 +311,7 @@ init\[Theta]rep[\[Lambda]T_] := init\[Theta]rep[\[Lambda]T] = Block[{kk, sd},
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Large\[CapitalLambda]Expansion*)
 
 
@@ -391,7 +391,7 @@ Large\[CapitalLambda]Expansion := Block[{},
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*SubleadingOrders*)
 
 
@@ -453,7 +453,7 @@ SubleadingOrders := Block[{},
 (*SubleadingOrders*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*GenerateEqnsForNumerics*)
 
 
@@ -589,6 +589,10 @@ InterpEqns[\[CapitalLambda]0_] := Block[
     // Expand
 ];
 
+
+
+
+
 (* Routine to produce a solution with monitoring of the minimization process *)
 FindSol := (
   i = 0;
@@ -611,6 +615,9 @@ FindSol := (
   ]
 );
 
+
+
+
 (* Routine to produce a solution silently (without monitoring) *)
 SilentFindSol := (
   i = 0;
@@ -631,7 +638,15 @@ SilentFindSol := (
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Input:: *)
+(*FindSol*)
+
+
+(* ::Input:: *)
+(*Table[sol[\[CapitalLambda]vals[[k]]], {k, Length[\[CapitalLambda]vals]}][[-1]]*)
+
+
+(* ::Subsection:: *)
 (*SolveAt\[CapitalLambda]0*)
 
 
@@ -656,7 +671,7 @@ SolveAt\[CapitalLambda]0 := Block[{},
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*GenerateSolsFromAsymptotics*)
 
 
@@ -703,64 +718,135 @@ GenerateSolsFromAsymptotics := Block[{},
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Iterate*)
 
 
-(* Iteration procedure for numerical solutions *)
+stepList = {}; (* Store steps *)
 Iterate := Block[{},
-  
-  (* Display initial messages *)
   mPrint["Numerical iterations towards \[CapitalLambda] = ", \[CapitalLambda]target];
-  mPrint["If step becomes below \!\(\*SuperscriptBox[\(10\), \(-7\)]\), try to increase prec"];
-  
+  mPrint["If step becomes below 10^-7, try to increase prec"];
+
   (* Initialize iteration parameters *)
-  pp = pmin; 
+  pp = pmin;
   qq = 1;
-  step := qq / base^pp;
   
+
+  step := (qq / base^pp);
+
   (* Start the iterative procedure *)
   \[CapitalLambda]Last = \[CapitalLambda]vals[[-1]];
-  
-  (* Monitor the iterative process *)
+
   Monitor[
     While[\[CapitalLambda]Last > \[CapitalLambda]target,
       
-      (* Compute the next \[CapitalLambda] value, ensuring it doesn't go below \[CapitalLambda]target *)
+      (* Compute next \[CapitalLambda] value *)
       \[CapitalLambda]new = Max[\[CapitalLambda]Last - step, \[CapitalLambda]target];
-      
+
+      (* Append current step to the list *)
+      AppendTo[stepList, step];
+
       (* Generate the interpolated equations for the new \[CapitalLambda] value *)
       normedrel = InterpEqns[\[CapitalLambda]new];
-      
+
       (* Solve numerically and adjust step size if needed *)
       Which[
-        
         (* If step is too big, increase precision scaling factor pp *)
         Catch[SilentFindSol] === "Too big step",
         pp = pp + 1,
-        
+
         (* If sufficient iterations are completed, store solution and continue *)
         i > 5,
         sol[\[CapitalLambda]new] = minsolrep;
         AppendTo[\[CapitalLambda]vals, \[CapitalLambda]new],
-        
+
         (* Default case: store solution and dynamically adjust step size *)
         True,
         sol[\[CapitalLambda]new] = minsolrep;
         AppendTo[\[CapitalLambda]vals, \[CapitalLambda]new];
-        
-        (* Adjust step size if pp is greater than pmin *)
+
+        (* Adjust step size dynamically *)
         If[pp > pmin,
           qq = qq + \[CapitalDelta]q;
           If[qq == base, qq = 1; pp = pp - 1];
         ]
       ];
-      
-      (* Update the last \[CapitalLambda] value in the iteration *)
+
+      (* Update last computed \[CapitalLambda] value *)
       \[CapitalLambda]Last = \[CapitalLambda]vals[[-1]];
-      
+
     ],
-    
+    (* Display the current \[CapitalLambda] value and step size during iteration *)
+    Row[{"Current \[CapitalLambda] is: ", \[CapitalLambda]Last // N, "   step is: ", step // N}]
+  ] // PrintDone;
+  
+  (* Display final message listing all computed \[CapitalLambda] values *)
+  mPrint["Finished iterations. List of all \[CapitalLambda] computed: ", \[CapitalLambda]vals // N];
+
+];
+
+
+
+Print[Iterate];
+Iterate===Null
+
+
+Iterate := Block[{},
+  (* Initial messages *)
+  mPrint["Numerical iterations towards \[CapitalLambda] = ", \[CapitalLambda]target];
+  mPrint["If step becomes below 10^-7, try to increase prec"];
+
+  (* Initialize iteration parameters *)
+  pp = pmin;
+  qq = 1;
+
+  step := (qq / base^pp);
+
+  (* Start the iterative procedure *)
+  \[CapitalLambda]Last = \[CapitalLambda]vals[[-1]];
+
+  Monitor[
+    While[\[CapitalLambda]Last > \[CapitalLambda]target,
+
+      (* Compute next \[CapitalLambda] value *)
+      \[CapitalLambda]new = Max[\[CapitalLambda]Last - step, \[CapitalLambda]target];
+      
+      (* Append current step to the list *)
+      AppendTo[stepList, step];
+
+      (* If step is too small, print the message and exit *)
+      If[step < 10^-7, Print["Too small step size"]; Return["bad"]];
+
+      (* Generate the interpolated equations for the new \[CapitalLambda] value *)
+      normedrel = InterpEqns[\[CapitalLambda]new];
+
+      (* Solve numerically and adjust step size if needed *)
+      Which[
+        (* If step is too big, increase precision scaling factor pp *)
+        Catch[SilentFindSol] === "Too big step",
+        pp = pp + 1,
+
+        (* If sufficient iterations are completed, store solution and continue *)
+        i > 5,
+        sol[\[CapitalLambda]new] = minsolrep;
+        AppendTo[\[CapitalLambda]vals, \[CapitalLambda]new],
+
+        (* Default case: store solution and dynamically adjust step size *)
+        True,
+        sol[\[CapitalLambda]new] = minsolrep;
+        AppendTo[\[CapitalLambda]vals, \[CapitalLambda]new];
+
+        (* Adjust step size dynamically *)
+        If[pp > pmin,
+          qq = qq + \[CapitalDelta]q;
+          If[qq == base, qq = 1; pp = pp - 1];
+        ]
+      ];
+
+      (* Update last computed \[CapitalLambda] value *)
+      \[CapitalLambda]Last = \[CapitalLambda]vals[[-1]];
+
+    ],
     (* Display the current \[CapitalLambda] value and step size during iteration *)
     Row[{"Current \[CapitalLambda] is: ", \[CapitalLambda]Last // N, "   step is: ", step // N}]
   ] // PrintDone;
@@ -771,7 +857,74 @@ Iterate := Block[{},
 
 
 
-(* ::Subsection::Closed:: *)
+Iterate := Block[{},
+  (* Initial messages *)
+  mPrint["Numerical iterations towards \[CapitalLambda] = ", \[CapitalLambda]target];
+  mPrint["If step becomes below 10^-7, try to increase prec"];
+
+  (* Initialize iteration parameters *)
+  pp = pmin;
+  qq = 1;
+
+  step := (qq / base^pp);
+
+  (* Start the iterative procedure *)
+  \[CapitalLambda]Last = \[CapitalLambda]vals[[-1]];
+
+  Monitor[
+    While[\[CapitalLambda]Last > \[CapitalLambda]target,
+
+      (* Compute next \[CapitalLambda] value *)
+      \[CapitalLambda]new = Max[\[CapitalLambda]Last - step, \[CapitalLambda]target];
+
+      (* If step is too small, print the message and return "TooSmallStepSize" *)
+      If[step < 10^-7, Print["Too small step size"]; Return["TooSmallStepSize", Block]];
+
+      (* Generate the interpolated equations for the new \[CapitalLambda] value *)
+      normedrel = InterpEqns[\[CapitalLambda]new];
+
+      (* Solve numerically and adjust step size if needed *)
+      Which[
+        (* If step is too big, increase precision scaling factor pp *)
+        Catch[SilentFindSol] === "Too big step",
+        pp = pp + 1,
+
+        (* If sufficient iterations are completed, store solution and continue *)
+        i > 5,
+        sol[\[CapitalLambda]new] = minsolrep;
+        AppendTo[\[CapitalLambda]vals, \[CapitalLambda]new],
+
+        (* Default case: store solution and dynamically adjust step size *)
+        True,
+        sol[\[CapitalLambda]new] = minsolrep;
+        AppendTo[\[CapitalLambda]vals, \[CapitalLambda]new];
+
+        (* Adjust step size dynamically *)
+        If[pp > pmin,
+          qq = qq + \[CapitalDelta]q;
+          If[qq == base, qq = 1; pp = pp - 1];
+        ]
+      ];
+
+      (* Update last computed \[CapitalLambda] value *)
+      \[CapitalLambda]Last = \[CapitalLambda]vals[[-1]];
+
+    ],
+    (* Display the current \[CapitalLambda] value and step size during iteration *)
+    Row[{"Current \[CapitalLambda] is: ", \[CapitalLambda]Last // N, "   step is: ", step // N}]
+  ] // PrintDone;
+  
+  (* Display final message listing all computed \[CapitalLambda] values *)
+  mPrint["Finished iterations. List of all \[CapitalLambda] computed: ", \[CapitalLambda]vals // N];
+
+  (* If iteration completes successfully, return Null *)
+  Null
+];
+
+
+
+
+(* ::Subsection:: *)
 (*Inits*)
 
 
@@ -790,7 +943,7 @@ ToSYT[rigged_]:=ToTableau[kkrrec[ConstantArray[{1,1},Length[rigged[[1,1]]]],rigg
 
 
 (* ::Subsubsection:: *)
-(*Inits*)
+(*SolutionFromSYT*)
 
 
 (* Compute a solution starting from a given standard Young tableau (SYT) *)
@@ -825,12 +978,71 @@ SolutionFromSYT[SYT_] := Block[{},
   Iterate;
 ];
 
-(* Placeholder function for mPrint to suppress unnecessary output *)
-mPrint[x_] := Null;
 
 
 
-(* ::Subsection::Closed:: *)
+
+SolutionFromSYT[SYT_] := Block[{
+    stepThreshold = 10^-7,
+    precIncrement = 10,
+    maxPrec = 200, (* Maximum precision limit to avoid infinite loops *)
+    solutionSucceeded = False
+  },
+
+  While[Not[solutionSucceeded] && prec <= maxPrec,
+
+    solutionSucceeded = True; (* Assume it will succeed *)
+
+    (* Assign the input SYT to global variables *)
+    \[Lambda]T = SYT;
+    \[Lambda] = SYT // ToYD; (* Convert SYT to Young diagram shape *)
+
+    (* Generate the Q-system for the given Young diagram *)
+    GenerateQsystem[\[Lambda]];
+
+    (* Perform a 1/\[CapitalLambda] expansion *)
+    Large\[CapitalLambda]Expansion;
+
+    (* Compute subleading orders in the 1/\[CapitalLambda] expansion *)
+    SubleadingOrders;
+
+    (* Generate equations for numerical solving *)
+    GenerateEqnsForNumerics;
+
+    (* Solve for the initial \[CapitalLambda] value *)
+    SolveAt\[CapitalLambda]0;
+
+    (* Generate initial solutions using asymptotic approximation *)
+    GenerateSolsFromAsymptotics;
+
+    (* Reset \[CapitalLambda]vals: keeps track of solved \[CapitalLambda] values *)
+    \[CapitalLambda]vals = \[CapitalLambda]vals0;
+
+    (* Try running Iterate *)
+    Print["Starting Iterate with precision: ", prec];
+    internalOutput = Iterate;
+
+    (* Check if Iterate returned TooSmallStepSize *)
+    If[internalOutput === "TooSmallStepSize",
+      Print["Iterate returned too small step size. Increasing precision to: ", prec + precIncrement];
+      prec += precIncrement;
+      SetParameters[maxord, \[CapitalLambda]0, prec, interpord, startinterpord, MyMaxIterations, base, pmin, RecoverySpeed, \[CapitalLambda]target];
+      solutionSucceeded = False; (* Mark as unsuccessful and retry *)
+    ];
+  ];
+
+  (* If max precision is reached, warn the user *)
+  If[prec > maxPrec, Print["Maximum precision reached. Could not complete solution."]];
+
+  Print["Solution completed at precision: ", prec];
+];
+
+
+
+Iterate
+
+
+(* ::Subsection:: *)
 (*Relating to rigged configurations*)
 
 
@@ -972,7 +1184,7 @@ NewStepIterate[howcloselambda1_, smalllambda_] := Block[{},
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*SetParameters*)
 
 
@@ -1074,7 +1286,7 @@ lazylazySolver[yd_, riggs_] := Module[
     allbetheQ = {};
 
     (* Debugging Print statement *)
-    Print[riggs];
+    (*Print[riggs];*)
 
     (* Solve Bethe ansatz from SYT (assumption: `riggs` is an index) *)
     SolutionFromSYT[mySYT[[riggs]]];
@@ -1213,7 +1425,49 @@ Append[{}]/@(Table[{Table[ConstantArray[i,Length[modes[[j,i]]]],{i,Sort[Range[Le
 
 
 (* ::Section:: *)
+(*Optional but convenience function *)
+
+
+round[x_, precision_: 10^-5] := Round[x, precision] // N;
+
+mPrint[x___] := Null;
+
+
+(* ::Subsection:: *)
+(*Mute print*)
+
+
+(* ::Input:: *)
+(*PrintDone[x_] := x;*)
+(*mPrint[x___] := Null;*)
+(*Off[FrontEndObject::notavail]*)
+
+
+(* ::Input:: *)
+(*(* Restore mPrint to print messages *)*)
+(*mPrint[x___] := Print[x];*)
+(**)
+(*(* Restore PrintDone to print timing information *)*)
+(*PrintDone[x_] := (Print["...Done in: ", Timing[x][[1]], "s"]; x);*)
+(**)
+
+
+(* ::Section:: *)
 (*Test*)
+
+
+SetParameters[
+    5,          (* maxord *)
+    4,          (* \[CapitalLambda]0 *)
+    90,        (* prec *)
+    30,         (* interpord *)
+    5,         (* startinterpord *)
+    10,         (* MyMaxIterations *)
+    2,          (* base *)
+    7,          (* pmin *)
+    1/1000,   (* RecoverySpeed *)
+    1           (* \[CapitalLambda]target *)
+]
 
 
 yd={4,2,1};
@@ -1221,3 +1475,4 @@ L=Total[yd];
 rigs=ModestoRiggedConfig[L,#]&/@ModesConfig[yd];
 showRC/@rigs;
 mySYT=ToSYT/@rigs;
+mysol=SolutionFromSYT[mySYT[[1]]]
