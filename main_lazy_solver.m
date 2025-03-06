@@ -653,7 +653,7 @@ SilentFindSol := (
 (* Solving first point solution, to decide where to start *)
 SolveAt\[CapitalLambda]0 := Block[{},
   
-  (* Inform the user about the current attempt at \[CapitalLambda]0 *)
+  (* Inform about the current attempt at \[CapitalLambda]0 *)
   mPrint["Checking if can solve at \[CapitalLambda]0. If this produces mistakes, increase \[CapitalLambda]0"];
   
   (* Initialize iteration counter *)
@@ -1031,7 +1031,7 @@ SolutionFromSYT[SYT_] := Block[{
     ];
   ];
 
-  (* If max precision is reached, warn the user *)
+  (* If max precision is reached, warning *)
   If[prec > maxPrec, Print["Maximum precision reached. Could not complete solution."]];
 
   Print["Solution completed at precision: ", prec];
