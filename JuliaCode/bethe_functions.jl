@@ -1,21 +1,4 @@
-function plot_branch_summary(br)
-    step_vals = [pt.step for pt in br.branch]
-    p_vals = [pt.param for pt in br.branch]
-    arc_vals = [abs(pt.ds) for pt in br.branch]
-    x_vals = [pt.x1 for pt in br.branch]  # state values
-    diff_x_vals = diff(x_vals)
-
-
-    plot(
-        plot(p_vals, x_vals, title="solution vs λ0", xlabel="λ0", ylabel="solution",seriestype=:scatter),
-        plot(p_vals[2:end], diff_x_vals, title="Δsolution vs λ0", xlabel="λ0", ylabel="Δsolution",seriestype=:scatter),
-        plot(arc_vals,p_vals, title="λ0 vs Arc Length", ylabel="λ0", xlabel="Arc Length"),
-        plot(step_vals, p_vals, title="Step vs λ0", xlabel="Step", ylabel="λ0"),
-        plot(step_vals, arc_vals, title="Step vs λ0", xlabel="Step", ylabel="Arc Length"),
-        size=(1000,500),legend=false,
-        layout=(1,5)
-    )
-end
+using CSV, DataFrames,BifurcationKit,Plots,JLD2,Serialization,LinearAlgebra,Suppressor,ForwardDiff, Statistics
 
 # Extract the last solution
 function extract_last_solution(br)
@@ -66,6 +49,35 @@ end
 
 
 ######################################################################
+function load_scale_data_and_initialize(λ0::Float64, path::String)
+    global vars, vars_init, expr_funcs, df, load_initial_data
+    load_initial_data = CSV.read(path, DataFrame)
+    # Extract the expressions and variable names
+    original_exprs = load_initial_data.expression
+    b_vars = load_initial_data.var
+    vars = Symbol.(vcat(b_vars, "h"))
+    initialvar_processed = replace.(string.(load_initial_data.Initialvar), r"\*10\^" => "e")
+    vars_init = BigFloat.(initialvar_processed)
+    
+    # Scale variables in expressions
+    scaled_expressions = copy(original_exprs)
+    for (i, expr) in enumerate(scaled_expressions)
+        modified_expr = expr
+        for v in b_vars
+            # Use word boundaries to ensure we're replacing complete variable names
+            modified_expr = replace(modified_expr, Regex("\\b$v\\b") => "($(λ0)*$v)")
+        end
+        scaled_expressions[i] = modified_expr
+    end
+    df = scaled_expressions
+    
+    # Load the expressions from the CSV file with λ0 in scope
+    expr_funcs = let λ0=λ0
+        [eval(Expr(:->, Expr(:tuple, vars...), Meta.parse(expr)))
+         for expr in df]
+    end
+end
+
 
 function load_data_and_initialize(path::String)
     global vars, vars_init, expr_funcs,df
@@ -92,83 +104,194 @@ function G(u, p)
 end;
 
 
-function make_opts(newton_tol,dsmax_tol)
+
+# Define a struct to hold continuation parameters
+mutable struct ParameterOpts
+    ds::Float64
+    dsmax::Float64
+    dsmin::Float64
+    lambda0::Float64
+    max_newton_iterations::Int64
+    newton_tol::Float64
+    a::Float64
+    verbose::Bool
+end
+
+
+function make_opts(opts::ParameterOpts)
     return ContinuationPar(
-        ds = my_ds, # step size
-        dsmin = my_dsmin, # minimum step size
-        dsmax = dsmax_tol, # maximum step size
-        p_min = 0., # minimum value of the parameter
-        p_max = lambda0, # maximum value of the parameter
-        max_steps = 1e5, # maximum number of steps
-        newton_options = NewtonPar(tol = newton_tol,
-                    max_iterations = my_newton_iterations,
-                    verbose = false),
-        detect_bifurcation = 0, 
+        ds = opts.ds,
+        dsmin = opts.dsmin, 
+        dsmax = opts.dsmax,
+        p_min = 0.,
+        p_max = opts.lambda0,
+        max_steps = 1e5,
+        newton_options = NewtonPar(
+            tol = opts.newton_tol,
+            max_iterations = opts.max_newton_iterations,
+            verbose = opts.verbose),
+        detect_bifurcation = 0,
         detect_event = 0,
-        a = my_a, 
+        a = opts.a,
         detect_loop = false
     )
 end
 
 
-function run_continuation_with_tol(prob, dsmax, method; dp_tol=0.3, initial_tol=1e-12, max_tol=1e-7)
-    my_tol = initial_tol   # initial newton tolerance
-    br = nothing
-    while true
+function run_continuation_with_tol(
+    prob::BifurcationProblem, 
+    method, 
+    opts::ParameterOpts=myOpts; 
+    dp_tol=0.3, 
+    max_tol=1e-4, 
+    tol_multiplier=10.0)
+    
+    local_opts = deepcopy(opts)
+    #local_opts.newton_tol = initial_tol  initial_tol=1e-12,
+    
+    while local_opts.newton_tol <= max_tol
+        cont_opts = make_opts(local_opts)
+        
         br = continuation(
-            prob, # defined problem
-            method, # method to use e.g. PALC()
-            make_opts(my_tol, dsmax), 
-            normC = norminf,  # norm function
-            callback_newton = (state; kwargs...) -> cb(state; kwargs..., dp=dp_tol), # callback function
-            verbosity = 0 # verbosity level (0 to 3)
-            )
+            prob,
+            method,
+            cont_opts,
+            normC = norminf,
+            callback_newton = (state; kwargs...) -> cb(state; kwargs..., dp=dp_tol),
+            verbosity = my_verbosity
+        )
+        # Check immediately if we've reached the target
         if br.sol[end].p == 0
-
-            break
-        elseif my_tol >= max_tol
-            error("Failed to reach br.sol[end].p == 0 even at max tolerance.")
-        else
-            @warn "br.sol[end].p != 0 with tol=$my_tol, increasing tolerance and retrying..."
-            println(br.sol[end].p)
-            my_tol *= 10
+            return br
         end
+        
+        # Log the current value and increase tolerance
+        @info "Failed to reach target (p=$(br.sol[end].p)) with tol=$(local_opts.newton_tol), increasing tolerance"
+        local_opts.newton_tol *= tol_multiplier
     end
-    return br
+    
+    # If we get here, we've exceeded max_tol
+    error("Failed to reach br.sol[end].p == 0 even at maximum tolerance $(max_tol)")
 end
 
 
 
-function run_lazy(my_dp_tol)
+
+
+#=
+function run_lazy(prob, dp_tol::Float64,myOpts)
     run = run_continuation_with_tol(
-        prob, 
-        1e100, # dsmax 
+        prob,
         PALC(tangent = Bordered(),θ=0.5), 
         #MoorePenrose(method = BifurcationKit.iterative),
-        dp_tol=my_dp_tol, 
-        initial_tol=my_initial_tol, 
+        myOpts,
+        dp_tol=dp_tol,
         max_tol=1e-2)
     return run
 end
+=#
 
-function my_tol_x(indices)
-    if length(indices) == 0
-        return 0.01  # Default tolerance if no indices are provided
-    else
-        return my_dx_tol  # Adjust as needed for the specific indices
-    end
+function run_continuation_with_tol(
+    prob::BifurcationProblem, 
+    method, 
+    opts::ParameterOpts=myOpts; 
+    dp_tol)
+    
+    br = continuation(
+            prob,
+            method,
+            make_opts(opts),
+            normC = norminf,
+            callback_newton = (state; kwargs...) -> cb(state; kwargs..., dp=dp_tol),
+            verbosity = my_verbosity
+        )
+    return br 
 end
 
+function run_lazy(prob, dp_tol::Float64,myOpts)
+    run = run_continuation_with_tol(
+        prob,
+        PALC(tangent = Bordered(),θ=0.5), 
+        #MoorePenrose(method = BifurcationKit.iterative),
+        myOpts,
+        dp_tol=dp_tol)
+    return run
+end
+
+# function my_tol_x(indices)
+#     if length(indices) == 0
+#         return 0.01  # Default tolerance if no indices are provided
+#     else
+#         return my_dx_tol  # Adjust as needed for the specific indices
+#     end
+# end
+
+# function cb(state; dp, kwargs...)
+#     _x        = get(kwargs, :z0, nothing)
+#     fromNewton = get(kwargs, :fromNewton, false)
+#     if !fromNewton && _x !== nothing
+#         dp_jump = abs(_x.p - state.p)
+#         dx_vals = abs.(_x.u[indices] .- state.x[indices])  # Compute differences for all indices
+#         tol_vals = my_tol_x(indices)                      # Get tolerances for all indices
+#         if any(dx_vals .> tol_vals) || dp_jump > dp       # Check if any dx exceeds tolerance or dp_jump is too large
+#             return false
+#         end
+#     end
+#     return true
+# end
+
+
 function cb(state; dp, kwargs...)
-    _x        = get(kwargs, :z0, nothing)
+    _x = get(kwargs, :z0, nothing)  # Previous solution
     fromNewton = get(kwargs, :fromNewton, false)
+    
     if !fromNewton && _x !== nothing
-        dp_jump = abs(_x.p - state.p)
-        dx_vals = abs.(_x.u[indices] .- state.x[indices])  # Compute differences for all indices
-        tol_vals = my_tol_x(indices)                      # Get tolerances for all indices
-        if any(dx_vals .> tol_vals) || dp_jump > dp       # Check if any dx exceeds tolerance or dp_jump is too large
+        dp_jump = abs(_x.p - state.p)  # Change in parameter
+        dx_vals = abs.(_x.u .- state.x)  # Change in solution
+        
+        # Define tolerances dynamically
+        tol_vals = [0.01 * max(1, abs(x)) for x in state.x]
+        
+        # Check if any dx exceeds tolerance or dp_jump is too large
+        if any(dx_vals .> tol_vals) || dp_jump > dp
             return false
         end
     end
+    
     return true
 end
+
+
+using GLMakie
+
+function dymamic_plot()
+    fig = Figure()
+    ax1 = Axis(fig[1, 1])
+    ax2 = Axis(fig[2, 1])
+
+    sl_sol = Slider(fig[3, 1], range = 1:length(final_result.sol[1].x), startvalue = 1, update_while_dragging=true)
+    label = Label(fig[3, 2], lift(x -> "Component: $x", sl_sol.value))
+
+    x = [get_solp(final_result, i) for i in 1:length(final_result)]
+
+    y_lift = lift(sl_sol.value) do sol
+        y = [get_solx(final_result, i)[sol] for i in 1:length(final_result)]
+        ymin, ymax = minimum(y), maximum(y)
+        margin = 0.1 * (ymax - ymin + eps())  # add 10% margin
+        GLMakie.ylims!(ax1, ymin - margin, ymax + margin)
+        y
+    end
+
+    diff_y_lift = lift(y_lift) do y
+        dy = abs.(diff(y))
+        ymin, ymax = minimum(dy), maximum(dy)
+        margin = 0.1 * (ymax - ymin + eps())
+        GLMakie.ylims!(ax2, ymin - margin, ymax + margin)
+        dy
+    end
+
+    GLMakie.scatter!(ax1, x, y_lift)
+    GLMakie.lines!(ax2, diff_y_lift)
+
+    fig
+end 
