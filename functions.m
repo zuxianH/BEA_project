@@ -133,7 +133,7 @@ Quiet[Needs["Combinatorica`"]];
 ToSYT[rigged_]:=ToTableau[kkrrec[ConstantArray[{1,1},Length[rigged[[1,1]]]],rigged[[2;;3]]]];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Rigged Configuration*)
 
 
@@ -190,7 +190,7 @@ iRange=Range[maxI];
 Q[a_,i_]:=Qi[nus[[a]],i];
 Table[If[a==1,L,0]-Sum[A[[a,b]]*Q[b,i],{b,1,n-1}],{a,1,n-1},{i,iRange}]];
 
-(* =========Handle your flat rigging format=========*)
+(* =========Handle flat rigging format=========*)
 
 (*Distinct lengths present in a partition,sorted DESC (e.g.{2,1})*)
 LengthsDesc[part_List]:=Reverse@Sort@DeleteDuplicates[part];
@@ -295,7 +295,7 @@ AssembleRowByLens[stringRow_List, lens_List, rowsByLen_List] :=
 RigsForStringConfigSorted[yd_, string_] := Block[
   {stringmatrix, holes, perRowChoices, lens, counts, choicesByLen, tuplesByLen, assembledRows},
 
-  (* === your holes computation verbatim === *)
+  (* ===  holes computation verbatim === *)
   stringmatrix =
     Table[Count[string[[i]], jj], {i, Length[string] - 1}, {jj, Max[string // Flatten]}];
 
@@ -334,7 +334,7 @@ RigsForStringConfigSorted[yd_, string_] := Block[
   If[MemberQ[perRowChoices, {}],
     {},                                                (* some row has no choices -> none overall *)
     assembledRows = Tuples[perRowChoices];             (* combine across rows *)
-    (* wrap to your {path, string, rigs} format *)
+    (* wrap to {path, string, rigs} format *)
     {{ConstantArray[1, Total[yd]]}, string, #} & /@ assembledRows
   ]
 ];
@@ -467,7 +467,7 @@ RiggedToModes[rigged_] :=
 
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*RiggedSYT*)
 
 
@@ -839,7 +839,7 @@ PlotLegends->{"Bethe roots","String roots"},
 
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*LoadResults*)
 
 
@@ -1101,7 +1101,7 @@ GetAllRootsFromSYT[syt_] := Module[
 
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*ShowPlots.nb*)
 
 
@@ -1267,6 +1267,7 @@ PlotDistanceBoxWhisker[dataKKR_, indexa_, length_] := Module[
 (*HelpFunctionInStringSolver*)
 
 
+(*Input: Modes number and it length. Output: string roots*)
 SolutionFromModeConfigurationSafe[modes_,L_]:=Check[
        TimeConstrained[
          Quiet[
@@ -1281,6 +1282,7 @@ SolutionFromModeConfigurationSafe[modes_,L_]:=Check[
 
 
 ClearAll[GetAllStringConfig];
+(*Input: syt. Output: all possible string configurations*)
 GetAllStringConfig[syt_] := Module[
   {yd, rigged},
   
@@ -1288,21 +1290,19 @@ GetAllStringConfig[syt_] := Module[
   yd = ToYD[syt];
   
   (* Rigged configuration corresponding to the SYT *)
-  rigged = ToRigged[syt];
+  rigged = ToRiggedExact[syt];
   
   (* Generate the list of modes *)
   RigsForStringConfigSorted[yd, rigged[[2]]]
 ]
 
 ClearAll[GetAllStringSol];
+(*Input: syt. Output: all possible solutions of string configurations*)
 GetAllStringSol[syt_] := Module[
   {yd, rigged, listofmode, maxnum},
   
-  (* Convert SYT to Young diagram *)
   yd = ToYD[syt];
-  
-  (* Convert to rigged configuration *)
-  rigged = ToRigged[syt];
+  rigged = ToRiggedExact[syt];
   
   (* Compute list of mode configurations *)
   listofmode = RiggedToModes /@ RigsForStringConfigSorted[yd, rigged[[2]]];
@@ -1321,8 +1321,7 @@ GetAllStringSol[syt_] := Module[
 GetStringSol[syt_] := Module[
   {yd, rigged, listofmode, maxnum},
   
-  (* Convert to rigged configuration *)
-  rigged = ToRigged[syt];
+  rigged = ToRiggedExact[syt];
   
   (* Determine the maximum label in the SYT *)
   maxnum = Max@Flatten[syt];
@@ -1333,7 +1332,7 @@ GetStringSol[syt_] := Module[
 
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*HelpFunctionInPlot*)
 
 
