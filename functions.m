@@ -3,7 +3,7 @@
 <<"/home/zuxian/Documents/BAE/RC.m"
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*SYT*)
 
 
@@ -133,7 +133,7 @@ Quiet[Needs["Combinatorica`"]];
 ToSYT[rigged_]:=ToTableau[kkrrec[ConstantArray[{1,1},Length[rigged[[1,1]]]],rigged[[2;;3]]]];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Rigged Configuration*)
 
 
@@ -467,7 +467,7 @@ RiggedToModes[rigged_] :=
 
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*RiggedSYT*)
 
 
@@ -504,7 +504,7 @@ ToRiggedExact[SYT_] := Module[{path, rank, rc},
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Modes number*)
 
 
@@ -839,7 +839,7 @@ PlotLegends->{"Bethe roots","String roots"},
 
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*LoadResults*)
 
 
@@ -943,12 +943,12 @@ AppendTo[ccoeffattarget,ccoeffsolvedattarget]//Flatten,ccoeffattarget]];
 (* Function: GetBData at lambda=0 from Julia, Input SYT*)
 GetBData[syt_List] := Module[
   {
-    file, data, toIndexed, myvars, rules
+   file,data, toIndexed, myvars, rules
   },
   
   (* --- Construct file path --- *)
   file = StringTemplate[
-    "/home/zuxian/Documents/BAE_algorithm/saved_data/result_`1`.csv"
+    ""<>ToString[SetDirectory[NotebookDirectory[]]]<>"/saved_data/result_`1`.csv"
   ][syt // ToString];
   
   (* --- Import and parse data --- *)
@@ -1332,7 +1332,7 @@ GetStringSol[syt_] := Module[
 
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*HelpFunctionInPlot*)
 
 
