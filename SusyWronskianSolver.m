@@ -1,8 +1,6 @@
 (* ::Package:: *)
 
 Quiet[Needs["Combinatorica`"]];
-
-
 (*All paths between points A and B (both coordinates {x,y})*)
 PathsAtoB[A_, B_] := Block[{paths},
   	paths = {};
@@ -112,10 +110,11 @@ Do[
 
 
 
+
 fermlist := Table[
   Module[{Qi},
     Qi = Q[{i}, {j}] /. coeffs[{i}, {j}];
-    Qi /. u -> u + \[HBar] * ((mP[[1]] - mP[[2]])/2)
+    Qi /. u -> u + \[HBar] * ((mP[[1]] - mP[[2]])/2) /. \[HBar] -> I
     
   ],
   {i, mP[[1]]},
@@ -144,23 +143,145 @@ YQ\[Theta][0,0,YD_]:=Product[u-\[Theta][i],{i,Total[YD]}] (*The LHS of 2.20*)
 (*boslist=Table[(Q[{i},{}])/. u -> (u + hbar*((mP[[1]]-mP[[2]]-2j+1)/2 )),{i,mP[[1]]},{j,mP[[1]]-mP[[2]]}]/.hbar->I;*)
 
 
-(* Page 20. Example of gl_{1|1}*)
-(*Does not works for {0,2},{2,0}*)
-yd = {2,1};
-KDpath[yd][[All,-1]]
+ClearAll[GenerateSusyWronskian]
+GenerateSusyWronskian[mP_, YD_] :=
+ Block[{\[Nu]marked, \[Lambda]marked, coeffs, fermlist, boslist, SusyWronskian, \[Lambda], \[Nu]},
 
-markedPoint[yd_]:=KDpath[yd][[2,-1]]
-mP=markedPoint[yd]
+  \[Lambda] = mP[[1]];
+  \[Nu] = mP[[2]];
+
+  \[Lambda]marked = lambdaMarked[YD, mP];
+  \[Nu]marked = nuMarked[YD, mP];
+
+  (* Eq. 2.33 *)
+  mMarked[A_, J_] := Total[\[Lambda]marked[[#]] & /@ A] + 
+    Total[\[Nu]marked[[#]] & /@ J] -
+    Length[A] (Length[A] - 1)/2 -
+    Length[J] (Length[J] - 1)/2 +
+    Length[A] Length[J];
+
+  (* Q-polynomial definition with numeric \[Lambda],\[Nu] fixed *)
+  With[{\[Lambda] = \[Lambda], \[Nu] = \[Nu]},
+   Q[A_List, J_List] :=
+    u^mMarked[A, J] +
+     Sum[c[A, J][k] u^(mMarked[A, J] - k), {k, 1, mMarked[A, J]}] /. 
+      c[A, J][i_] :>
+       Which[
+        Length[A] == 1 && Length[J] == 0 && MemberQ[\[Lambda]marked, mMarked[A, J] - i], 0,
+        Length[A] == 0 && Length[J] == 1 && MemberQ[\[Nu]marked, mMarked[A, J] - i], 0,
+        True, c[A, J][i]
+       ];
+   ];
+
+  (* === Solve Eq. 2.21 === *)
+  Do[
+   Module[{lhsCoeffs, rhsCoeffs, cfs},
+    cfs = CoefficientList[
+      (Q[{a}, {i}] /. u -> u + I/2) - (Q[{a}, {i}] /. u -> u - I/2),
+      u
+    ];
+    lhsCoeffs = cfs / cfs[[-1]];
+    rhsCoeffs = CoefficientList[Q[{a}, {}] Q[{}, {i}], u];
+    coeffs[{a}, {i}] =
+      First@Solve[
+        lhsCoeffs - rhsCoeffs == 0,
+        CoefficientList[Q[{a}, {i}], u][[2 ;; -2]]
+      ];
+    ],
+   {a, 1, \[Lambda]}, {i, 1, \[Nu]}
+  ];
+
+  (* === Build fermionic list === *)
+  fermlist = Table[
+    Module[{Qi},
+      Qi = Q[{i}, {j}] /. coeffs[{i}, {j}];
+      Qi /. u -> u + I*((\[Lambda] - \[Nu])/2)
+    ],
+    {i, \[Lambda]}, {j, \[Nu]}
+  ];
+
+  (* === Build bosonic list === *)
+  boslist = Table[
+    Module[{Qi, shift},
+      Qi = Q[{i}, {}];
+      shift = I*((\[Lambda] - \[Nu] - 2 j + 1)/2);
+      Qi /. u -> u + shift
+    ],
+    {i, \[Lambda]}, {j, \[Lambda] - \[Nu]}
+  ];
+
+  (* === Supersymmetric Wronskian Eq. 2.20 === *)
+  SusyWronskian = (-1)^(\[Nu] (\[Lambda] - \[Nu])) * Det[ArrayFlatten[{{fermlist, boslist}}]];
+
+  (* === Define LHS polynomial === *)
+  YQ\[Theta][0, 0, YD] := Product[u - \[Theta][i], {i, Total[YD]}];
+
+  <|
+    "FermList" -> fermlist,
+    "BosList" -> boslist,
+    "SusyWronskian" -> SusyWronskian,
+    "YQ\[Theta]" -> YQ\[Theta][0, 0, YD]
+  |>
+]
+
+
+
+(* Page 20. Example of gl_{1|1}*)
+yd ={2,1};
+mP={2,0};
 \[Lambda]marked=lambdaMarked[yd,mP]
 \[Nu]marked=nuMarked[yd,mP]
-mMarked[{1},{1}];
 
-Q[{1},{}]
-Q[{},{1}]
-Q[{},{}]
-
-vars = Rest[Variables[SusyWronskian]]
-Solve[CoefficientList[SusyWronskian-YQ\[Theta][0,0,yd],u]==0/.{\[Theta][1]->0, \[Theta][2]->0,\[Theta][3]->0},vars]//N
+SusyWronskian = GenerateSusyWronskian[mP,yd][["SusyWronskian"]];
+LocalYQ\[Theta] = GenerateSusyWronskian[mP,yd][["YQ\[Theta]"]];
+vars = Rest[Variables[SusyWronskian]];
+eqs=CoefficientList[SusyWronskian,u]/CoefficientList[SusyWronskian,u][[-1]]-CoefficientList[LocalYQ\[Theta],u]/.(Rest[Variables[LocalYQ\[Theta]]]/.\[Theta][i__]:>\[Theta][i]->0);
+mysol = NSolve[eqs==0,vars]
 
 
+(*QQ-relations Eq.17 *)
+WQQa[A_List, I_List, a_, b_] :=
+  Q[Join[A, {a}, {b}], I]  == 
+  Wron[{Q[Join[A, {a}], I], Q[Join[A, {b}], I]}]/Q[A, I]
+WQQb[A_List, I_List, a_, i_] :=
+  Q[Join[A, {a}], I] Q[A, Join[I,{i}]] - 
+  Wron[{Q[Join[A, {a}], Join[I, {i}]], Q[A, I]}]/Wron[{Q[Join[A, {a}], Join[I, {i}]], Q[A, I]}]
+WQQc[A_List, I_List, i_, j_] :=
+  Q[A,Join[I, {i}, {j}]] Q[A, I] - 
+  Wron[{Q[ A, Join[I, {i}]], Q[A,Join[I, {j}]]}]
 
+(*Eq. 5.7*)
+Qbb[a_, s_] := Q[Range[a + 1, mP[[1]] ], Range[s + 1, mP[[2]]]]
+
+lessEqualmPDomain = (Table[{a, s}, {a, 0, mP[[1]]}, {s, 0, mP[[2]]}] // Flatten[#, 1] &)//Rest
+Table[
+  With[{a = pair[[1]], b = pair[[2]]},
+    Qbb[a, b]
+  ],
+  {pair, lessEqualmPDomain}
+]//MatrixForm
+
+
+Variables[CoefficientList[LocalYQ\[Theta],u]]
+
+
+(*Example Bosonic BAE for yd = {4,2,1}*)
+yd = {4,2,1};
+mP={3,0};
+\[Lambda]marked=lambdaMarked[yd,mP]
+\[Nu]marked=nuMarked[yd,mP]
+GenerateSusyWronskian[mP,yd];
+ 
+SusyWronskian = GenerateSusyWronskian[mP,yd][["SusyWronskian"]];
+LocalYQ\[Theta] = GenerateSusyWronskian[mP,yd][["YQ\[Theta]"]];
+vars = Rest[Variables[SusyWronskian]];
+eqs=CoefficientList[SusyWronskian,u]/CoefficientList[SusyWronskian,u][[-1]]-CoefficientList[LocalYQ\[Theta],u]/.(Variables[CoefficientList[LocalYQ\[Theta],u]]/.\[Theta][i__]:>\[Theta][i]->0);
+mysol = NSolve[eqs==0,vars];
+
+
+(*Bethe roots*)
+r20=Table[Solve[(Qbb[2,0]/.mysol[[j]])==0,u],{j,Length@mysol}]//Values//Flatten;
+r10=Table[Solve[((I u)/2+2 I u^3+1/4 I c[{2},{}][1]+I u^2 c[{2},{}][1]-I c[{2},{}][3]-1/4 I c[{3},{}][1]+3 I u^2 c[{3},{}][1]+2 I u c[{2},{}][1] c[{3},{}][1]/.mysol[[j]])==0,u],{j,Length@mysol}]//Values//Flatten//Sort;
+
+
+r10//ComplexListPlot
