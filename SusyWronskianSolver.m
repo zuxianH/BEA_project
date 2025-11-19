@@ -335,19 +335,10 @@ mMarked[A_, J_] := Module[
 (*(*Eq. 5.7*)*)
 (*Qbblocal[a_, s_] := Qlocal[Range[a + 1, mP[[1]]], Range[s + 1, mP[[2]]]]*)
 (*(*EvalQFunction find the distinguished Q function in Subscript[Q, A|B] and reduce A and B recursive into single indices using QQ-relations*)*)
-(*EvalQFunction[a_,s_]:=ExpandQ[Qbblocal[a,s]]/.{Qlocal->Q,Wronlocal->Wron}*)
-(*(*unknowed variables, which can be find using wQQb*)*)
-(*Complement[Variables[Table[EvalQFunction[a,0],{a,Length@yd-1}]]/.u->Nothing,mysol[[1]]//Keys]*)
-
-
-(* ::Input:: *)
-(*wQQb[2,1]*)
-
-
-(* ::Input:: *)
-(*(*Bethe roots*)*)
+(*EvalQFunction[a_,s_]:=ExpandQ[Qbblocal[a,s]]*)
+(**)
 (*r20=Table[Solve[(EvalQFunction[2,0]/.mysol[[j]])==0,u],{j,Length@mysol}]//Values//Flatten;*)
-(*r10=Table[Solve[(EvalQFunction[1,0]/.wQQb[2,1]/.mysol[[j]])==0,u],{j,Length@mysol}]//Values//Flatten;*)
+(*r10=Table[Solve[(EvalQFunction[1,0]/.mysol[[j]])==0,u],{j,Length@mysol}]//Values//Flatten;*)
 (*ComplexListPlot[{r20,r10},PlotRange->All]*)
 
 
@@ -374,6 +365,30 @@ wQQb[a_, i_] :=
 ClearAll[ExpandQ];
 ExpandQ[expr_] := expr /. Qlocal[a_List, j_List] :> expandQsingle[Qlocal[a, j]];
 
+ExpandQ[expr_] := 
+ Module[{tmp},
+   tmp = expr /. Qlocal[a_List, j_List] :> expandQsingle[Qlocal[a, j]]
+   (*tmp /. {Qlocal -> Q,Wronlocal->Wron}*)
+ ];
+ 
+ClearAll[ExpandQ];
+
+ExpandQ[expr_] := Module[{},
+
+  (* 2. Apply recursive expansion *)
+  tmp = expr /. Qlocal[a_List, j_List] :> expandQsingle[Qlocal[a, j]];
+  (* 1. Extract all mixed Q\[CloseCurlyQuote]s: Qlocal[{a},{i}]  *)
+  mixedQs = DeleteDuplicates @ Cases[
+     tmp,
+     Qlocal[a_List, j_List] /; Length[a] == 1 && Length[j] == 1 :> {a//First,j//First},
+     Infinity
+  ];
+  
+  localwQQb = (wQQb @@ # & /@ mixedQs)//Flatten;
+
+  tmp /. {Qlocal -> Q,Wronlocal->Wron}/.localwQQb
+];
+ 
 ClearAll[expandQsingle];
 expandQsingle[Qlocal[A_List, J_List]] := expandQsingle[Qlocal[A, J]] =
   Module[{lenA, lenJ, A0, a, b, J0, i, j},
