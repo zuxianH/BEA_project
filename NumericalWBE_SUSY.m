@@ -86,27 +86,28 @@ GenerateQsystem[\[Lambda]_] := Block[{},
 (*GenerateSUSYWsystem*)
 
 
-GenerateSUSYWsystem[yd_]:=Block[{mP,susyresult,LocalYQ\[Theta],mypath,SusyWronskian},
-
-	mP={Length@yd,0};
-	mP={1,1};
-	mP=RandomSample[Select[Endpoints[yd], #[[1]] > #[[2]] &],1]//First;
-	mP={Length@yd,0};
-	mP={Length@yd,0};
-	susyresult= GenerateSusyWronskian[mP,yd];
-	SusyWronskian =susyresult[["SusyWronskian"]];
-	LocalYQ\[Theta] = susyresult[["YQ\[Theta]"]];
-	susyvars = Rest[Variables[SusyWronskian]];
-	
-	mypath=Intersection[(Select[ AllPaths[yd], Last[#] === mP & ][[1]]),DomainOfInterest]//Reverse;
-	AllrelWronskian =CoefficientList[YQa[0,0,yd]-Getmonic@SusyWronskian,u]//Expand//(#/.Complex[0,b_]:>b)&;
-	(*susy2ccoefficient*)
-	allsusycoeff = Computesusy2cCoefficients[yd,mypath,mP];
-	(*c2susycoefficient*)
-    c2susycoeff = Computec2susyCoefficients[yd,mypath/.{{0,0}->Nothing}];
-    Print[mP,(allsusycoeff//Keys//Sort)-susyvars];
-
-]
+(* ::Input:: *)
+(*GenerateSUSYWsystem[yd_]:=Block[{mP,susyresult,LocalYQ\[Theta],mypath,SusyWronskian},*)
+(**)
+(*	mP={Length@yd,0};*)
+(*	mP={1,1};*)
+(*	mP=RandomSample[Select[Endpoints[yd], #[[1]] > #[[2]] &],1]//First;*)
+(*	mP={Length@yd,0};*)
+(*	mP={Length@yd,0};*)
+(*	susyresult= GenerateSusyWronskian[mP,yd];*)
+(*	SusyWronskian =susyresult[["SusyWronskian"]];*)
+(*	LocalYQ\[Theta] = susyresult[["YQ\[Theta]"]];*)
+(*	susyvars = Rest[Variables[SusyWronskian]];*)
+(*	*)
+(*	mypath=Intersection[(Select[ AllPaths[yd], Last[#] === mP & ][[1]]),DomainOfInterest]//Reverse;*)
+(*	AllrelWronskian =CoefficientList[YQa[0,0,yd]-Getmonic@SusyWronskian,u]//Expand//(#/.Complex[0,b_]:>b)&;*)
+(*	(*susy2ccoefficient*)*)
+(*	allsusycoeff = Computesusy2cCoefficients[yd,mypath,mP];*)
+(*	(*c2susycoefficient*)*)
+(*    c2susycoeff = Computec2susyCoefficients[yd,mypath/.{{0,0}->Nothing}];*)
+(*    Print[mP,(allsusycoeff//Keys//Sort)-susyvars];*)
+(**)
+(*]*)
 
 
 (* ::Subsection::Closed:: *)

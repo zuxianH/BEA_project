@@ -1022,10 +1022,6 @@ AppendTo[ccoeffattarget,ccoeffsolvedattarget]//Flatten,ccoeffattarget]];
 (*GetData*)
 
 
-GetBData[{{1, 2, 3, 4}, {5, 6, 8}, {7}}]
-GetRootsFromSYT[{{1, 2, 3, 4}, {5, 6, 8}, {7}}]
-
-
 (* Function: GetBData at lambda=0 from Julia, Input SYT*)
 GetBData[syt_List] := Module[
   {
