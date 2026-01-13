@@ -3,7 +3,41 @@
 <<"/home/zuxian/Documents/BAE/RC.m"
 
 
-(* ::Section::Closed:: *)
+ConvertFromCoefficientToRoots[solc_] := Module[
+  {solList, allBetheQ, allBetheRootEqns, betheRoots},
+
+  (* 1) If solc is a single solution (flat list of rules), wrap it in a list *)
+  solList = If[ MatchQ[solc, {(_Rule)...}],
+                {solc},      (* single solution \[RightArrow] list of one *)
+                solc         (* already a list of solutions *)
+             ];
+
+  (* 2) Map over each solution in solList *)
+  Map[
+    Function[sol,
+      (* apply the solution to the Bethe equations *)
+      allBetheQ = Table[YQa[w, 0, yd], {w, Length[yd] - 1}] /. sol;
+      allBetheRootEqns = Thread[allBetheQ == 0];
+
+      (* solve each equation for u *)
+      betheRoots = Map[
+        Function[eqn,
+          Module[{r = Solve[eqn, u]},
+            If[r === {}, Missing["NoSolution"], u /. r]
+          ]
+        ],
+        allBetheRootEqns
+      ];
+
+      betheRoots
+    ],
+    solList
+  ]
+]
+
+
+
+(* ::Section:: *)
 (*SYT*)
 
 
@@ -839,6 +873,54 @@ PlotLegends->{"Bethe roots","String roots"},
 
 
 
+ClearAll[CheckKKRMinimum];
+CheckKKRMinimum[syt_] := Module[
+  {
+    allstringsol, stringsol, bethesol, listofdistance,
+    minpositionindex, allriggeds, kkrindex, checkKkRMinimum
+  },
+  
+  (* Generate all relevant data *)
+  allstringsol = GetAllStringSol[syt];
+  stringsol = GetStringSol[syt];
+  bethesol = GetRootsFromSYT[syt];
+  
+  (* Compute total distance for each string solution *)
+  listofdistance =  Table[
+     Table[
+       DistanceMeasure[
+         Transpose[{allstringsol[[ww]], bethesol}][[kk, 1]],
+         Transpose[{allstringsol[[ww]], bethesol}][[kk, 2]]
+       ],
+       {kk, Length[ToYD[syt]] - 1}
+     ],
+     {ww, Length[allstringsol]}
+  ][[All,1]];
+  
+  (* Find minimal distance position *)
+  minpositionindex = First@First@PositionSmallest[listofdistance, 1];
+  
+  (* Compute KKR index *)
+  allriggeds = GetAllStringConfig[syt];
+  kkrindex = First@First@Position[allriggeds, ToRiggedExact[syt]];
+  
+  (* Compare *)
+  checkKkRMinimum = kkrindex == minpositionindex;
+  
+  <|
+"SYT"->syt,
+    "IsKKRMinimum" -> checkKkRMinimum,
+"KKRIndex" -> kkrindex,
+    "MinIndex" -> minpositionindex,
+    "MinDistance" -> listofdistance[[minpositionindex]],
+    "KKRDistance" -> listofdistance[[kkrindex]],
+    "BestStringSol" -> allstringsol[[minpositionindex]],
+    "KKRStringSol" -> allstringsol[[kkrindex]], 
+"SYTSol"->bethesol
+  |>
+]
+
+
 (* ::Section:: *)
 (*LoadResults*)
 
@@ -938,6 +1020,10 @@ AppendTo[ccoeffattarget,ccoeffsolvedattarget]//Flatten,ccoeffattarget]];
 
 (* ::Subsection:: *)
 (*GetData*)
+
+
+GetBData[{{1, 2, 3, 4}, {5, 6, 8}, {7}}]
+GetRootsFromSYT[{{1, 2, 3, 4}, {5, 6, 8}, {7}}]
 
 
 (* Function: GetBData at lambda=0 from Julia, Input SYT*)
@@ -1101,7 +1187,7 @@ GetAllRootsFromSYT[syt_] := Module[
 
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*ShowPlots.nb*)
 
 
@@ -1118,7 +1204,7 @@ LoadBAEResults[yd_,list_:All] := Module[
   
   (* File path *)
   file = StringJoin[
-    "/home/zuxian/Documents/BAE_algorithm/final_result/",
+    "/home/zuxian/Documents/BAE/RootsData/",
     ToString[yd], ".csv"
   ];
   
@@ -1150,7 +1236,7 @@ LoadBAEResults[yd_,list_:All] := Module[
 ClearAll[LoadDistanceData];
 (*load distance data*)
 LoadDistanceData[yd_] := Module[
-  {files},
+  {},
   
   files = FileNames[
     "distancedata_*.csv",
@@ -1311,7 +1397,7 @@ GetAllStringSol[syt_] := Module[
   maxnum = Max@Flatten[syt];
   
   (* Compute the safe solution for each mode configuration *)
-  Table[
+  ParallelTable[
     SolutionFromModeConfigurationSafe[listofmode[[kk]], maxnum],
     {kk, Length@listofmode}
   ]
@@ -1332,7 +1418,7 @@ GetStringSol[syt_] := Module[
 
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*HelpFunctionInPlot*)
 
 
