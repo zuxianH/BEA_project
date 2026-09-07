@@ -1,0 +1,12 @@
+# Local environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.matplotlib/
+.agents/
+.codex/
+
+# Large local archive and datasets (excluded from GitHub)
+/BAE_Bertini.zip
+/BAE_Bertini/Result_SYT/all_SYT_{5,4,3,2,1}.csv
+/Result_SYT/all_SYT_{5,4,3,2,1}.csv

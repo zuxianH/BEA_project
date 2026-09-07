@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "/home/zuxian/Documents/Bertini/continue_lambda0_to_zero.py", line 440, in <module>
+    main()
+    ~~~~^^
+  File "/home/zuxian/Documents/Bertini/continue_lambda0_to_zero.py", line 436, in main
+    run_one(input_path, args)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/zuxian/Documents/Bertini/continue_lambda0_to_zero.py", line 305, in run_one
+    status, endpoint, residual = continue_parameter(
+                                 ~~~~~~~~~~~~~~~~~~^
+        system=system,
+        ^^^^^^^^^^^^^^
+    ...<6 lines>...
+        predictor=args.predictor,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/zuxian/Documents/Bertini/continue_lambda0_to_zero.py", line 183, in continue_parameter
+    stepping.initial_step_size = rational(initial_step_size)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Boost.Python.ArgumentError: Python argument types in
+    None.None(SteppingConfig, Rational)
+did not match C++ signature:
+    None(bertini::tracking::SteppingConfig {lvalue}, boost::multiprecision::number<boost::multiprecision::backends::gmp_rational, (boost::multiprecision::expression_template_option)0>)

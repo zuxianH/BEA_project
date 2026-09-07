@@ -1,0 +1,6 @@
+stage,seconds
+continuation_seconds,0.033725456
+load_problem_seconds,0.00127393999901
+script_total_seconds,0.0361981199985
+start_residual_seconds,0.000924769999983
+write_output_seconds,0.000273953999567

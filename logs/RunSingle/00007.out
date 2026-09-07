@@ -1,0 +1,8 @@
+"Running SYT with Bertini: ""{{1, 2, 3, 4, 5, 6, 12, 13, 14, 15}, {7, 8, 9, 10, 11, 16}}"
+"Run failed."
+"FailureReason: ""Solver returned no solution history"
+"RunID: ""syt-c38acc36-3246-4493-84a3-f157a1c06c08"
+"Result CSV: ""/home/zuxian/Documents/Bertini/.runs/batch-results/{10,6}/{{1, 2, 3, 4, 5, 6, 12, 13, 14, 15}, {7, 8, 9, 10, 11, 16}}.csv"
+"Bertini stdout log: ""/home/zuxian/Documents/Bertini/.runs/syt-c38acc36-3246-4493-84a3-f157a1c06c08/julia.stdout.log"
+"Bertini stderr log: ""/home/zuxian/Documents/Bertini/.runs/syt-c38acc36-3246-4493-84a3-f157a1c06c08/julia.stderr.log"
+"Bertini timing CSV: ""/home/zuxian/Documents/Bertini/.runs/syt-c38acc36-3246-4493-84a3-f157a1c06c08/julia.timings.csv"
