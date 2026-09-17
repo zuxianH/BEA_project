@@ -1,0 +1,19 @@
+{
+  "fail_{10,6}.txt": "70d077b57e7b1b3fed3d9c60eb84390baca6a774b0252f23aa282d61a9bd67bf",
+  "all_SYT_{4,2,1}.csv": "49b76ca27a50f3e875e37402e6119b24320cbe66fcf5ee19fbe619e8995f4e0d",
+  "{{1, 3, 4, 7, 8, 11, 13, 15, 17, 18, 19, 20}, {2, 5, 6, 9, 10, 12, 14, 16}}.csv": "dcaff7a0706ef9645738ba1976ae358d215ee5af8c63ae95e2f11f092dde16fb",
+  "fail_{3,2,1}.txt": "70d077b57e7b1b3fed3d9c60eb84390baca6a774b0252f23aa282d61a9bd67bf",
+  "fail_{8,8}.txt": "70d077b57e7b1b3fed3d9c60eb84390baca6a774b0252f23aa282d61a9bd67bf",
+  "all_SYT_{10,6}.csv": "d55d413b8728e87badafe44a4f1ca6767e2855bfb20df2e102b68e385db14550",
+  "all_SYT_{8,8}.csv": "c84a109a515575012c0c743232511919d66be3e37a7f29b26fdc2f5fec0787c1",
+  "all_SYT_{11,5}.csv": "5c9ed17745abdea82c1e8bba30726505e5ab98be817990b1c2fc273329ca2b4d",
+  "all_SYT_{5,4,3,2,1}_false_flip_distances.csv": "2eba9d959e825d6dfdedf2f8dcc66404cfd7f668023a3f594e41de2125300b4f",
+  "all_SYT_{9,7}.csv": "011319438775a5f03a3f7d530940e8737e0526c658b28088426c76c501b5aac2",
+  "fail_{9,7}.txt": "70d077b57e7b1b3fed3d9c60eb84390baca6a774b0252f23aa282d61a9bd67bf",
+  "all_SYT_{3,2,1}.csv": "6738316adb1fa55274e47e5319489e242ff34fd9a334028f5f34038d4a63b669",
+  "{{1, 3, 4, 5, 8, 11, 13, 15, 17, 18, 19, 20}, {2, 6, 7, 9, 10, 12, 14, 16}}.csv": "1ecb40c9531a262e247460342857c89296bead4c747ffe26983a3cdf2f7bcf11",
+  "all_SYT_{5,4,3,2,1}.csv": "1d54423976fddfab1a9754339d81e4b184e8d966f25e9286ef74cce54c34082f",
+  "{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16}, {11, 12, 13, 14, 15}}.csv": "bc999ed0b89f1cd073b76b9cf71e3b1d33467dabbbf1439c9a66c1b042a8eb9d",
+  "fail_{11,5}.txt": "70d077b57e7b1b3fed3d9c60eb84390baca6a774b0252f23aa282d61a9bd67bf",
+  "fail_{4,2,1}.txt": "70d077b57e7b1b3fed3d9c60eb84390baca6a774b0252f23aa282d61a9bd67bf"
+}

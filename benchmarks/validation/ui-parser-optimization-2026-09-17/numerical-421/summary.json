@@ -1,0 +1,36 @@
+{
+  "project": "/home/zuxian/Documents/BAE_Bertini",
+  "reference_sha256": {
+    "/home/zuxian/Documents/BAE_Bertini/Result_SYT/all_SYT_{4,2,1}.csv": "49b76ca27a50f3e875e37402e6119b24320cbe66fcf5ee19fbe619e8995f4e0d"
+  },
+  "settings": {
+    "BERTINI_INITIAL_LAMBDA": "500",
+    "BERTINI_TARGET_LAMBDA": "0",
+    "BERTINI_WORKING_PRECISION": "100",
+    "BERTINI_DEFAULT_PRECISION": "100",
+    "BERTINI_TRACKING_TOLERANCE": "1e-12",
+    "BERTINI_INFINITE_TOLERANCE": "1e30",
+    "BERTINI_MAX_PRECISION": "1200",
+    "BERTINI_MAX_NUM_STEPS": "500000",
+    "BERTINI_MAX_STEP_SIZE": "1/200",
+    "BERTINI_MAX_NEWTON_ITERATIONS": "4",
+    "BERTINI_PREDICTOR": "RKCashKarp45",
+    "BERTINI_CLEANUP_RUNS": "1"
+  },
+  "tolerance": "1E-8",
+  "passed": 0,
+  "total": 1,
+  "wall_seconds": 5.8852144419997785,
+  "cases": [
+    {
+      "case": 1,
+      "reference": "all_SYT_{4,2,1}.csv",
+      "tableau": "{{1, 2, 3, 4}, {5, 6}, {7}}",
+      "exit_code": 1,
+      "max_root_error": "Infinity",
+      "passed": false,
+      "wall_seconds": 5.883128617000239,
+      "solver_seconds": "3.429103"
+    }
+  ]
+}

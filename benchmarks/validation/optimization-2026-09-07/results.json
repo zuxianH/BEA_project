@@ -1,0 +1,59 @@
+{
+  "tolerance": "1e-8",
+  "comparison": "One-to-one roots within each Bethe-root level; multiplicities preserved.",
+  "settings": {
+    "BERTINI_INITIAL_LAMBDA": "500",
+    "BERTINI_TARGET_LAMBDA": "0",
+    "BERTINI_WORKING_PRECISION": "100",
+    "BERTINI_DEFAULT_PRECISION": "100",
+    "BERTINI_TRACKING_TOLERANCE": "1e-12",
+    "BERTINI_INFINITE_TOLERANCE": "1e30",
+    "BERTINI_MAX_PRECISION": "1200",
+    "BERTINI_MAX_NUM_STEPS": "500000",
+    "BERTINI_MAX_STEP_SIZE": "1/200",
+    "BERTINI_MAX_NEWTON_ITERATIONS": "4",
+    "BERTINI_PREDICTOR": "RKCashKarp45",
+    "BERTINI_CLEANUP_RUNS": "1"
+  },
+  "cases": [
+    {
+      "case": 1,
+      "reference": "all_SYT_{3,2,1}.csv",
+      "tableau": "{{1, 2, 6}, {3, 4}, {5}}",
+      "exit_code": 0,
+      "max_root_error": "4.691749384133025565180552981707414115217123904342160795117568455820737582036534367041833601097268560E-17",
+      "passed": true,
+      "wall_seconds": 9.656025324999064,
+      "solver_seconds": "5.789345",
+      "output_file": "case-01.csv",
+      "reference_sha256": "6738316adb1fa55274e47e5319489e242ff34fd9a334028f5f34038d4a63b669"
+    },
+    {
+      "case": 2,
+      "reference": "all_SYT_{3,2,1}.csv",
+      "tableau": "{{1, 2, 6}, {3, 5}, {4}}",
+      "exit_code": 0,
+      "max_root_error": "2.876225740695331875338286646736743457436016815185286905287446781459107845156834380255455491341036200E-17",
+      "passed": true,
+      "wall_seconds": 9.20461307700316,
+      "solver_seconds": "5.561326",
+      "output_file": "case-02.csv",
+      "reference_sha256": "6738316adb1fa55274e47e5319489e242ff34fd9a334028f5f34038d4a63b669"
+    },
+    {
+      "case": 1,
+      "reference": "all_SYT_{4,2,1}.csv",
+      "tableau": "{{1, 2, 3, 4}, {5, 6}, {7}}",
+      "exit_code": 0,
+      "max_root_error": "1.373415740831531341618042262922797559911141641794992490083998572254749335938361466207186487299454315E-14",
+      "passed": true,
+      "wall_seconds": 7.289839853001467,
+      "solver_seconds": "3.870341",
+      "output_file": "case-03.csv",
+      "reference_sha256": "49b76ca27a50f3e875e37402e6119b24320cbe66fcf5ee19fbe619e8995f4e0d"
+    }
+  ],
+  "python_tests_passed": 11,
+  "wolfram_precision_tests_passed": true,
+  "scope": "Representative cases only; full sweeps were stopped at the user request."
+}

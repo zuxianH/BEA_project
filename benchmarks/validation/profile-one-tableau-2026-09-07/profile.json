@@ -1,0 +1,23 @@
+{
+	"SucceededQ":true,
+	"Tableau":"{{1, 4, 6, 7}, {2, 5}, {3}}",
+	"DriverSeconds":5.703956,
+	"WorkflowLoadSeconds":0.307269,
+	"DriverSetupSeconds":2.3139999999999827e-3,
+	"RunSingleSeconds":5.390426,
+	"SolveSeconds":5.384644,
+	"MathematicaSolveSeconds":3.42690,
+	"RunSingleOtherSeconds":0.005782,
+	"SubTableauRootSeconds":0.003787,
+	"BertiniCalls":5,
+	"BertiniProcessSeconds":1.95774,
+	"PathTrackingSeconds":0.9204300600033,
+	"PythonMeasuredSeconds":0.9640299729863999,
+	"PythonProblemLoadSeconds":1.11103259842e-2,
+	"SymbolicSystemSeconds":0.604624,
+	"AsymptoticExpansionSeconds":5.919000000000001e-3,
+	"AsymptoticSolveSeconds":6.1484e-2,
+	"CoefficientConversionSeconds":1.0083e-2,
+	"MathematicaExportSeconds":2.334479,
+	"MathematicaImportSeconds":0.15702
+}

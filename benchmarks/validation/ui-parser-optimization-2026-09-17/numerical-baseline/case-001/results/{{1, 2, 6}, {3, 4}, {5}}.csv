@@ -1,0 +1,2 @@
+"RunID","Tableau","YoungDiagram","SucceededQ","FailureReason","Diagnostic","TimingSeconds","BetheRoots"
+"syt-63237cc8-8f04-402e-8748-6fdb2111ac7c","{{1, 2, 6}, {3, 4}, {5}}","{3, 2, 1}",false,"""Solver returned no solution history""","""FailureReason=\""Solver returned no solution history\"" | CompletedStages=0/4""",2.138418,"Missing[""SolverFailed"", ""Solver returned no solution history""]"

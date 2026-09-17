@@ -1,0 +1,1243 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{parskip}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  citecolor=blue!50!black,
+  urlcolor=blue!50!black,
+  pdftitle={The BAE Bertini Project},
+  pdfauthor={Zuxian He}
+}
+
+\newtheorem{definition}{Definition}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{remark}{Remark}[section]
+\newtheorem{conjecture}{Empirical Symmetry}[section]
+\newtheorem{example}{Example}[section]
+
+\newcommand{\file}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\Wron}{\operatorname{Wr}}
+\DeclareMathOperator{\Res}{Res}
+
+\title{\textbf{Wronskian Solutions of (Supersymmetric) Bethe Ansatz Equations:\\
+Formalism and a Bertini-Based Numerical Continuation Pipeline}}
+\author{Zuxian He \\ \small Department of Physics, Uppsala University}
+\date{September 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We give a formal account of the mathematical construction and numerical
+realization implemented in the \file{BAE\_Bertini} codebase, which computes
+Bethe roots of a nested integrable spin chain for eigenstates labeled by
+standard Young tableaux (SYT). The construction proceeds through a
+\emph{Q-system}: a lattice of auxiliary polynomials $Q_{a,s}(u)$ obeying a
+discrete bilinear (Hirota/QQ) functional relation, solved not directly but
+by representing the $Q_{a,s}$ as Wronskian (Casoratian) determinants of a
+common set of elementary building blocks --- a discrete analogue of the
+classical fact that Wronskians of solutions of a shared linear equation
+obey simple conservation laws. We derive the degree counting of
+the Q-functions from the geometry of the Young diagram, present the
+supersymmetric (bosonic/fermionic) generalization of the Wronskian
+solution obtained by choosing a \emph{marked point} (equivalently a
+Kac--Dynkin grading) on the diagram, and derive the vacancy-number
+combinatorics of the associated rigged-configuration / string-hypothesis
+description. We then formalize the numerical strategy: a single chain
+inhomogeneity is treated as a deformation parameter $\Lambda$, and the
+Q-system is solved by a \emph{parameter homotopy continuation} from an
+asymptotically free ($\Lambda\to\infty$) point, where the solution is
+combinatorially exact, down to the physical, homogeneous point
+$\Lambda=0$. We recall the general theory of homotopy continuation (the
+Davidenko differential equation and its predictor-corrector discretization)
+and describe how the project delegates this step to the numerical
+algebraic geometry package \textbf{Bertini}, through an adaptive
+multiple-precision path tracker, invoked via a parameter-homotopy driver
+written in Python. We close with the combinatorial symmetry used to
+validate numerical solutions (a rigging-complementation involution,
+realized combinatorially as Sch\"utzenberger evacuation, under which Bethe
+roots are conjectured to negate), quantitative validation and performance
+results, and a discussion of the construction's scope and limitations.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Introduction}
+%=============================================================================
+
+\subsection{Physical setting}
+
+Integrable spin chains of rank higher than one admit a \emph{nested}
+Bethe ansatz: magnon excitations are organized into several coupled
+families of rapidities, one family per node of an auxiliary root system,
+and the full spectrum is obtained by solving a coupled system of Bethe
+ansatz equations (BAE) across all families simultaneously. For a chain of
+length $L$, the spectrum organizes into multiplets labeled by partitions
+$\lambda$ of $L$ (Young diagrams); within a multiplet of shape $\lambda$,
+individual eigenstates are labeled by the standard Young tableaux (SYT)
+of that shape --- fillings of the diagram's $L$ boxes with the integers
+$1,\dots,L$ that increase along every row and down every column. This
+report is a self-contained account of a computational pipeline that,
+given a single SYT, numerically constructs the corresponding Bethe roots.
+
+Rather than attacking the Bethe equations directly in root variables, the
+pipeline uses the modern \emph{Q-system} reformulation of the nested Bethe
+ansatz, in which the fundamental objects are polynomials $Q_{a,s}(u)$ of
+the spectral parameter $u$, attached to nodes $(a,s)$ of a lattice built
+from the Young diagram, and required to satisfy a discrete bilinear
+functional relation (Section~\ref{sec:qsystem}). The distinguishing
+feature of this project is that the Q-system is not solved by treating
+the coefficients of every $Q_{a,s}$ as independent unknowns; instead, a
+closed-form solution is constructed directly as a \textbf{Wronskian
+(Casoratian) determinant} of a small number of elementary building
+blocks, split into a \emph{bosonic} and a \emph{fermionic} family
+according to a chosen \emph{marked point} on the diagram
+(Section~\ref{sec:susy}). This is the origin of the name
+\emph{(SUSY) Wronskian Bethe Equations} carried by the project.
+
+\subsection{Numerical strategy}
+
+Even after the Wronskian ansatz reduces the problem to finitely many
+polynomial equations in finitely many coefficients, those equations must
+still be solved numerically for each SYT. The pipeline does this by
+introducing a single auxiliary parameter $\Lambda$ --- realized physically
+as one chain site's inhomogeneity --- and constructing, at
+$\Lambda\to\infty$, an exact combinatorial solution associated with the
+tableau's shape (Section~\ref{sec:asymptotics}). The physical, homogeneous
+point $\Lambda=0$ is then reached by \emph{numerically continuing} this
+solution as $\Lambda$ is driven from its large starting value to zero ---
+a textbook parameter homotopy continuation problem, which we formalize in
+Section~\ref{sec:homotopy}. The tableau itself is built up one box at a
+time, each new box's site briefly appearing at large $\Lambda$ and then
+being continued into the homogeneous chain, so that a single SYT
+computation is in fact a sequence of $|\lambda|$ homotopy continuations,
+each seeded by the previous one's converged solution
+(Section~\ref{sec:sequential}).
+
+The actual path tracking is delegated to \textbf{Bertini}, a numerical
+algebraic geometry package implementing adaptive multiple-precision
+predictor-corrector continuation, through its Python interface. The
+symbolic construction of the Wronskian relations, and the orchestration of
+many such continuations across all SYT of a Young diagram, is carried out
+in the Wolfram Language; the two layers communicate through an explicit
+polynomial system exported to a plain-text file. We describe this
+numerical layer formally in Section~\ref{sec:homotopy} and summarize its
+software realization in Section~\ref{sec:implementation}.
+
+\subsection{Scope and evidentiary status of this report}
+
+This report is based on a direct reading of the project's source files. A
+number of internal comments cite specific equation numbers of an external
+reference (``Eq.~2.3'', ``Eq.~2.33'', ``Eq.~5.7'', ``Eq.~5.8''), indicating
+that the construction of Section~\ref{sec:susy} is a direct numerical
+implementation of a specific paper; that paper is not included in the
+repository. Where this report states a physical interpretation that is not
+explicit in an in-code comment, this is flagged as an inference from the
+code's structure rather than a fact quoted from a reference. The
+mathematical structure itself --- the Q-system, the Wronskian solution,
+the marked-point/grading freedom, the vacancy-number combinatorics, and
+the numerical continuation scheme --- is, by contrast, directly and
+unambiguously present in the source and is derived formally below.
+
+\subsection{Outline}
+
+Section~\ref{sec:qsystem} introduces the Q-system and explains the
+Wronskian mechanism behind the Hirota/QQ relation. Section~\ref{sec:susy}
+constructs the supersymmetric Wronskian solution and its marked-point
+freedom. Section~\ref{sec:asymptotics} introduces the deformation
+parameter $\Lambda$, its asymptotic solution, and the sequential
+construction. Section~\ref{sec:rc} develops the rigged-configuration /
+string-hypothesis combinatorics and the flip symmetry used for
+validation. Section~\ref{sec:homotopy} formalizes homotopy continuation
+and Bertini's realization of it. Section~\ref{sec:worked-example} works
+every preceding definition out by hand on the smallest nontrivial shape.
+Section~\ref{sec:implementation} summarizes the software pipeline.
+Section~\ref{sec:results} reports validation and performance results.
+Section~\ref{sec:discussion} discusses scope, limitations, and outlook.
+Table~\ref{tab:notation} below collects the recurring notation for
+reference.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$\lambda\vdash L$, $\lambda'$ & Young diagram ($L$ boxes) labeling a multiplet, and its conjugate \\
+$\mathrm{SYT}$ & standard Young tableau: a filling of $\lambda$ labeling one eigenstate \\
+$u$ & spectral parameter (rapidity) \\
+$Q_{a,s}(u)$ & Q-function at lattice node $(a,s)$; $M(a,s)$ its polynomial degree \\
+$\theta_1,\dots,\theta_L$ & chain-site inhomogeneities; all zero for a homogeneous chain \\
+$\Wron[f,g]$ & discrete Wronskian (Casoratian) of $f,g$, Eq.~\eqref{eq:wron2} \\
+$\mathrm{mP}=(\lambda_\ast,\nu_\ast)$ & marked point: bosonic/fermionic split of elementary Q-functions \\
+$Q_{A|J}$, $\gamma_{A,J,k}$ & Q-function (resp.\ its coefficients) for bosonic set $A$, fermionic set $J$ \\
+$c_{a,s,k}$ & generic-basis Taylor coefficients of $Q_{a,s}$ (Section~\ref{sec:bases}) \\
+$\Lambda$, $\Lambda_0$ & continuation (deformation) parameter and its large starting value \\
+$n^{(a)}_s$, $J$, $P^{(a)}_s$ & string multiplicity, rigging, and vacancy number (Section~\ref{sec:rc}) \\
+$t$, $H(x,t)$ & homotopy parameter and homotopy function (Section~\ref{sec:homotopy}) \\
+\bottomrule
+\end{tabular}
+\caption{Recurring notation.}
+\label{tab:notation}
+\end{table}
+
+
+%=============================================================================
+\section{The Q-System Formalism}
+\label{sec:qsystem}
+%=============================================================================
+
+Written directly in terms of Bethe roots, the equations of a nested Bethe
+ansatz are a system of coupled transcendental equations in which every
+root of every family scatters off every other root of every family: even
+before any numerics, simply \emph{writing down} the equations for a
+chain with several nesting levels and more than a handful of roots per
+level is already unwieldy, and finding a good starting guess for a
+numerical solver is far from obvious. The Q-system reformulation
+sidesteps both difficulties at once. Rather than working with the roots
+themselves, one works with the (much better-behaved) generating
+polynomials that have those roots as their zeros; the coupling between
+different families of roots is then encoded not in a system of rational
+equations but in a single, uniform bilinear \emph{functional} relation
+between neighboring polynomials, Eq.~\eqref{eq:qq} below, which is the
+same at every node of the lattice regardless of how many roots are
+involved. This uniformity is exactly what makes the construction
+amenable to the closed-form (Wronskian) solution method of the rest of
+this section, and to the systematic numerical continuation of
+Section~\ref{sec:homotopy}.
+
+\subsection{Q-functions on the Young diagram}
+
+Let $\lambda=(\lambda_1\ge\lambda_2\ge\cdots)$ be a partition of $L$, drawn
+as a Young diagram, and let $\lambda'$ denote its conjugate partition. To
+each lattice point $(a,s)$ with $0\le a$, $0\le s$ we associate a monic
+polynomial $Q_{a,s}(u)$ of the spectral parameter $u$, of degree
+\begin{equation}
+  \label{eq:degree}
+  M(a,s) \;=\; L + a\,s \;-\; \sum_{i=1}^{a}\lambda_i \;-\; \sum_{j=1}^{s}\lambda'_j ,
+\end{equation}
+so that $M(a,s)=0$ once $(a,s)$ leaves the diagram's ``co-hook'' (the
+region where the formula would otherwise become negative); such nodes
+carry the trivial function $Q_{a,s}\equiv1$. The distinguished node
+$(0,0)$ has $M(0,0)=L$ and its polynomial,
+\begin{equation}
+  \label{eq:vacuum}
+  Q_{0,0}(u) \;=\; \prod_{n=1}^{L}\bigl(u-\theta_n\bigr),
+\end{equation}
+is fixed entirely by the chain's $L$ inhomogeneities $\theta_1,\dots,\theta_L$
+(one per site); for a homogeneous chain, all $\theta_n=0$ except possibly a
+single deformed site, as in Section~\ref{sec:asymptotics}.
+
+\begin{example}[A running example: $\lambda=(2,1)$]
+\label{ex:shape21}
+Throughout this report we will repeatedly return to the smallest Young
+diagram with more than one row, $\lambda=(2,1)$: two rows, of lengths $2$
+and $1$, three boxes in total ($L=3$). Its conjugate is $\lambda'=(2,1)$
+as well (the diagram is self-conjugate: two boxes stacked in the first
+column, one box in the second). This shape has exactly two standard
+fillings,
+\[
+  T_A=\begin{smallmatrix}1&2\\3&\end{smallmatrix}, \qquad
+  T_B=\begin{smallmatrix}1&3\\2&\end{smallmatrix},
+\]
+matching the hook-length count $3!/(3\cdot1\cdot1)=2$; in the language of
+the symmetric group $S_3$ acting on three objects, $\lambda=(2,1)$ is the
+two-dimensional ``standard'' irreducible representation, and $T_A,T_B$
+label a basis of it. Evaluating the degree formula \eqref{eq:degree} at
+every node with $a+s\le 2$ gives
+\[
+  M(0,0)=3, \qquad M(1,0)=M(0,1)=3-2=1, \qquad M(1,1)=M(2,0)=M(0,2)=0,
+\]
+so only three nodes carry a nontrivial polynomial: the length-3 vacuum
+$Q_{0,0}$, and two length-1 (linear) polynomials $Q_{1,0}$, $Q_{0,1}$ ---
+each with a single root. Since $\lambda$ has two rows, there is exactly
+one nesting level (Eq.~\eqref{eq:bethe-roots} below), so this shape's
+Bethe ansatz has, per eigenstate, a single Bethe root: the zero of
+$Q_{1,0}$.
+\end{example}
+
+\subsection{The Hirota (QQ) equation}
+\label{sec:hirota}
+
+Write $f^{[\pm k]}(u):=f(u\pm\tfrac{ik}{2})$ for a shift of the spectral
+parameter by $k$ half-units along the imaginary axis. The Q-functions of
+the nested Bethe ansatz are required to satisfy, at every node $(a,s)$ for
+which all four neighbors are defined,
+\begin{equation}
+  \label{eq:qq}
+  Q_{a,s}^{[+1]}\,Q_{a+1,s+1}^{[-1]} \;-\; Q_{a,s}^{[-1]}\,Q_{a+1,s+1}^{[+1]}
+  \;=\; i\bigl(M(a,s)-M(a+1,s+1)\bigr)\, Q_{a+1,s}(u)\, Q_{a,s+1}(u).
+\end{equation}
+This is the (additive-normalization) \emph{Hirota bilinear equation}, also
+called the \emph{QQ-relation}, of the discrete integrable hierarchy
+underlying the nested Bethe ansatz. It is, on the face of it, a
+transcendental functional equation; the project's numerical strategy
+depends on converting it into finitely many \emph{polynomial} equations in
+finitely many unknowns, which is accomplished in two complementary ways
+described below.
+
+\subsubsection*{Polynomial form}
+
+If every $Q_{a,s}$ appearing in \eqref{eq:qq} is taken to be a polynomial
+of the degree prescribed by \eqref{eq:degree}, with undetermined Taylor
+coefficients $c_{a,s,k}$,
+\begin{equation}
+  Q_{a,s}(u) \;=\; u^{M(a,s)} + \sum_{k=1}^{M(a,s)} c_{a,s,k}\, u^{M(a,s)-k},
+\end{equation}
+then the left- and right-hand sides of \eqref{eq:qq} are themselves
+polynomials in $u$ (the half-integer shifts only ever produce integer
+powers of $i$ once the two half-shifted products are subtracted), and
+matching coefficients of each power of $u$ turns \eqref{eq:qq} into a
+finite list of \emph{polynomial equations} in the $c_{a,s,k}$. This
+``generic'' route is available in the codebase and defines the ambient
+polynomial system that any solution --- however constructed --- must
+satisfy.
+
+\subsubsection*{Wronskian (Casoratian) solution}
+
+The project's principal method does not solve the polynomial system of
+the previous paragraph directly. Instead it \emph{generates} a family of
+functions satisfying \eqref{eq:qq} identically, by representing each
+$Q_{a,s}$ as a determinant of shifted copies of a common set of
+``elementary'' functions --- a discrete analogue of the Wronskian
+determinant of solutions of a linear ODE, sometimes called a
+\emph{Casoratian}. Concretely, define the discrete Wronskian of two
+functions $f,g$ by
+\begin{equation}
+  \label{eq:wron2}
+  \Wron[f,g](u) \;:=\; f^{[+1]}(u)\,g^{[-1]}(u) \;-\; f^{[-1]}(u)\,g^{[+1]}(u).
+\end{equation}
+
+Why should a determinant of this kind have any chance of satisfying a
+bilinear relation like \eqref{eq:qq}? The intuition is a discrete analogue
+of a classical fact about ordinary Wronskians: if two functions $f,g$ both
+solve a common linear second-order difference (``Baxter-type'') equation
+with shared potential $V(u)$,
+\begin{equation}
+  \label{eq:baxter-toy}
+  X(u+i) + X(u-i) \;=\; V(u)\,X(u), \qquad X\in\{f,g\},
+\end{equation}
+then their discrete Wronskian is a \emph{conserved quantity} of the shift:
+\begin{align}
+  \label{eq:wronskian-conservation}
+  \Wron[f,g]^{[+1]}(u) \;-\; \Wron[f,g]^{[-1]}(u)
+  &\;=\; g(u)\bigl[f(u{+}i){+}f(u{-}i)\bigr] \;-\; f(u)\bigl[g(u{+}i){+}g(u{-}i)\bigr] \notag\\
+  &\;=\; V(u)\bigl[g(u)f(u)-f(u)g(u)\bigr] \;=\;0,
+\end{align}
+by direct substitution of \eqref{eq:baxter-toy} for both $f$ and $g$ ---
+exactly the discrete counterpart of the elementary fact that the
+Wronskian of two solutions of a linear ODE with no first-derivative term
+is constant. This is the generic phenomenon exploited throughout the
+Q-system literature: elementary Q-functions are required to be solutions
+of a shared linear difference equation fixed by the vacuum data
+\eqref{eq:vacuum}, and Casoratians of such solutions automatically satisfy
+conservation-law-type bilinear identities under the shift $u\to u\pm i$.
+
+\begin{remark}[What is, and is not, claimed here]
+Equation~\eqref{eq:wronskian-conservation} is only the simplest instance
+of this mechanism (a vanishing right-hand side, for two solutions of the
+\emph{same}, ungraded linear equation). The actual QQ-relation
+\eqref{eq:qq} that the project's Q-system must satisfy has a
+\emph{nonzero} right-hand side $i(M_{a,s}-M_{a+1,s+1})\,Q_{a+1,s}Q_{a,s+1}$,
+and its bosonic and fermionic elementary building blocks
+(Section~\ref{sec:susy}) are solutions of two \emph{different, graded}
+linear problems, not one shared ungraded equation. Establishing that the
+specific super-Wronskian ansatz used here satisfies every instance of
+\eqref{eq:qq} on the full lattice --- not merely the toy identity
+\eqref{eq:wronskian-conservation} --- is a genuine consistency theorem
+about that graded construction; it belongs to the reference work the
+implementation follows (cited there by equation number, as noted in the
+Introduction) and is not re-derived from first principles in this report.
+What \emph{is} directly confirmed in the source code, and is recorded
+below exactly as implemented, is the recursive definition by which every
+higher Q-function is \emph{generated} from elementary ones once that
+consistency is assumed.
+\end{remark}
+
+The project's implementation makes this recursion explicit and constructive:
+writing $Q_{A|J}$ for the Q-function attached to a bosonic index set $A$
+and a fermionic index set $J$ (Section~\ref{sec:susy}), one has the
+reduction
+\begin{align}
+  \label{eq:reduction-bos}
+  Q_{A_0\cup\{a,b\}\,|\,J} &\;=\; \frac{\Wron\bigl[\,Q_{A_0\cup\{a\}|J},\,Q_{A_0\cup\{b\}|J}\,\bigr]}{Q_{A_0|J}}, \\
+  \label{eq:reduction-ferm}
+  Q_{A\,|\,J_0\cup\{i,j\}} &\;=\; \frac{\Wron\bigl[\,Q_{A|J_0\cup\{i\}},\,Q_{A|J_0\cup\{j\}}\,\bigr]}{Q_{A|J_0}},
+\end{align}
+i.e.\ a Q-function with one more bosonic (resp.\ fermionic) index than
+$Q_{A_0|J}$ is the ratio of the Wronskian of its two ``parents'' to
+$Q_{A_0|J}$ itself --- the discrete analogue of a classical Plücker
+relation among Wronskians of nested subsets of solutions. Every
+multi-index Q-function of the system is generated from single-index
+($|A|=|J|=1$, or one of $A,J$ empty) elementary Q-functions by iterating
+\eqref{eq:reduction-bos}--\eqref{eq:reduction-ferm}.
+
+
+%=============================================================================
+\section{The Supersymmetric Wronskian and the Marked-Point Freedom}
+\label{sec:susy}
+%=============================================================================
+
+\subsection{Marked points and gradings}
+
+The recursion \eqref{eq:reduction-bos}--\eqref{eq:reduction-ferm} treats
+the elementary building blocks as falling into two families, indexed by
+disjoint label sets: a \emph{bosonic} family of size $\lambda_\ast$ and a
+\emph{fermionic} family of size $\nu_\ast$, with $\lambda_\ast+\nu_\ast$
+equal to the number of rows of the Young diagram participating in the
+construction. The project calls the choice
+$\mathrm{mP}=(\lambda_\ast,\nu_\ast)$ a \textbf{marked point}: it fixes how
+many of the diagram's rows are assigned to the bosonic family versus the
+fermionic one. In the representation theory of a superalgebra
+$\mathfrak{gl}(\lambda_\ast|\nu_\ast)$, this is precisely the datum of a
+choice of \emph{simple-root system} (a \textbf{Kac--Dynkin diagram}): unlike
+an ordinary Lie algebra, a Lie superalgebra admits several inequivalent
+but representation-theoretically equivalent Dynkin diagrams, related by
+``fermionic duality'' moves, and different choices lead to Wronskian
+solutions of different total polynomial degree. The implementation makes
+this freedom explicit by enumerating admissible marked points/paths across
+the diagram and selecting one that minimizes the total number of Bethe
+roots to be computed --- a computational-efficiency criterion, not a
+physical one, applied on top of the mathematical freedom just described.
+
+\begin{remark}
+The repository does not state explicitly whether the physical spin chain
+being solved is itself supersymmetric, or whether the bosonic/fermionic
+split is used purely as a computational device that produces an efficient
+closed-form Wronskian solution for an ordinary (non-super) nested Bethe
+ansatz problem. Both readings are consistent with the mathematics above;
+this report presents the construction in a manner agnostic to that
+distinction and defers to the external source cited internally by
+equation number for the precise physical statement.
+\end{remark}
+
+\begin{example}[Marked points for $\lambda=(2,1)$]
+\label{ex:markedpoints21}
+Continuing Example~\ref{ex:shape21}: the diagram has two rows, so a
+marked point is a splitting $2=\lambda_\ast+\nu_\ast$, and there are three
+choices, $(\lambda_\ast,\nu_\ast)\in\{(2,0),(1,1),(0,2)\}$. The choice
+$(2,0)$ assigns \emph{both} rows to the bosonic family and none to the
+fermionic one: the super-Cauchy determinant \eqref{eq:susywronskian}
+below degenerates to an ordinary $2\times2$ Wronskian determinant of two
+purely bosonic towers, with no fermionic block at all --- the ``purely
+bosonic'' grading. The choice $(1,1)$ instead assigns one row to each
+family, mixing a single bosonic and a single fermionic elementary
+Q-function; the choice $(0,2)$ assigns both rows to the fermionic family.
+All three choices describe the \emph{same} vacuum polynomial $Q_{0,0}$, by
+construction, once each is separately fit to the target inhomogeneities
+\eqref{eq:wronskian-relations} --- they differ only in how many elementary
+coefficients must be solved for along the way, which is exactly the
+efficiency trade-off the marked-point search of
+Section~\ref{sec:implementation} is built to exploit.
+\end{example}
+
+\subsection{The super-Wronskian determinant}
+
+Fix a marked point $\mathrm{mP}=(\lambda_\ast,\nu_\ast)$. Denote the
+$\lambda_\ast$ bosonic elementary Q-functions by $Q_{\{p\}|\emptyset}$,
+$p=1,\dots,\lambda_\ast$, and the $\nu_\ast$ fermionic ones by
+$Q_{\emptyset|\{q\}}$, $q=1,\dots,\nu_\ast$. Form the two rectangular
+blocks of shifted elementary functions
+\begin{align}
+  B_{p,j}(u) &= Q_{\{p\}|\emptyset}\Bigl(u+\tfrac{i}{2}(\lambda_\ast-\nu_\ast-2j+1)\Bigr),
+  && 1\le p\le\lambda_\ast,\ \ 1\le j\le \lambda_\ast-\nu_\ast, \\
+  F_{p,q}(u) &= Q_{\{p\}|\{q\}}\Bigl(u+\tfrac{i}{2}(\lambda_\ast-\nu_\ast)\Bigr),
+  && 1\le p\le\lambda_\ast,\ \ 1\le q\le \nu_\ast,
+\end{align}
+where the mixed bosonic--fermionic building block $Q_{\{p\}|\{q\}}$ is
+itself fixed, for each single pair $(p,q)$, by demanding that it solve the
+elementary instance of \eqref{eq:qq} coupling the purely bosonic and
+purely fermionic elementary Q-functions,
+\begin{equation}
+  Q_{\{p\}|\{q\}}^{[+1]} - Q_{\{p\}|\{q\}}^{[-1]} \;=\; Q_{\{p\}|\emptyset}\; Q_{\emptyset|\{q\}},
+\end{equation}
+solved order by order in $u$ for the coefficients of $Q_{\{p\}|\{q\}}$
+(this is a linear recursion in the Taylor coefficients, since the
+right-hand side is already known once the bosonic and fermionic
+elementary blocks are fixed). The vacuum Q-function is then the single
+$\lambda_\ast\times\lambda_\ast$ super-Cauchy/Wronskian determinant
+\begin{equation}
+  \label{eq:susywronskian}
+  Q_{0,0}(u) \;=\; (-1)^{\nu_\ast(\lambda_\ast-\nu_\ast)}\,
+  \det\bigl[\, F \mid B \,\bigr](u),
+\end{equation}
+i.e.\ the determinant of the $\lambda_\ast\times\lambda_\ast$ matrix whose
+first $\nu_\ast$ columns are the fermionic block $F$ and whose remaining
+$\lambda_\ast-\nu_\ast$ columns are the bosonic block $B$. Built up by
+iterating the Wronskian-quotient recursion
+\eqref{eq:reduction-bos}--\eqref{eq:reduction-ferm} from the elementary
+bosonic and fermionic blocks, \eqref{eq:susywronskian} automatically
+satisfies the QQ-relation \eqref{eq:qq} against its neighbors for
+\emph{any} choice of the elementary block coefficients (Remark following
+Eq.~\eqref{eq:wronskian-conservation}); the only remaining task is to fix
+those coefficients so that \eqref{eq:susywronskian} reproduces the
+physical vacuum polynomial \eqref{eq:vacuum}, i.e.\ so that
+\begin{equation}
+  \label{eq:wronskian-relations}
+  \operatorname{monic}\bigl[\,Q_{0,0}^{\text{Wronskian}}(u)\,\bigr] \;=\; \prod_{n=1}^{L}(u-\theta_n),
+\end{equation}
+which, after clearing the overall normalization and matching coefficients
+of each power of $u$, is a finite polynomial system in the elementary
+blocks' coefficients --- the \textbf{Wronskian relations} that are
+ultimately handed to the numerical continuation of
+Section~\ref{sec:homotopy}.
+
+\subsection{Two coefficient bases}
+\label{sec:bases}
+
+Because the physical content of the Q-system is carried by the elementary
+bosonic/fermionic building blocks, while the generic polynomial system of
+Section~\ref{sec:hirota} is expressed in the coefficients $c_{a,s,k}$ of
+\emph{every} node, the implementation maintains an explicit two-way
+translation between:
+\begin{itemize}
+  \item the \textbf{generic basis}, $\{c_{a,s,k}\}$, one set of Taylor
+  coefficients per Young-diagram node;
+  \item the \textbf{Wronskian basis}, $\{\gamma_{A,J,k}\}$, the Taylor
+  coefficients of the elementary bosonic/fermionic blocks introduced
+  above.
+\end{itemize}
+The translation is carried out by a \emph{triangular elimination}: at each
+stage, one selects a coefficient-matching equation from
+\eqref{eq:wronskian-relations} (or its analogue for other nodes) that
+contains exactly one still-undetermined variable while every other symbol
+appearing in it is already known, and solves for that variable; the
+process is iterated until either every unknown has been eliminated or no
+such equation remains (in which case the system is under-determined in
+that basis, a known limitation for certain small diagrams). This is the
+formal content of what the implementation calls, informally, the
+``strict triangular sort''; only the Wronskian-basis coefficients
+$\gamma_{A,J,k}$ are exported as unknowns to the numerical continuation
+step, and the generic basis is recovered afterward, purely as a
+convenience for extracting Bethe roots (Section~\ref{sec:root-extraction}
+below).
+
+
+%=============================================================================
+\section{The Deformation Parameter and the Sequential Construction}
+\label{sec:asymptotics}
+%=============================================================================
+
+\subsection{The chain inhomogeneity as a homotopy parameter}
+\label{sec:lambda-def}
+
+Consider building the tableau's chain one site at a time. After the
+$(n{-}1)$-th site has already been solved (all its Wronskian-basis
+coefficients fixed at the physical, homogeneous point), the $n$-th site is
+introduced by setting its inhomogeneity to a formal parameter $\Lambda$
+while every earlier site retains its already-converged, homogeneous value
+of $0$:
+\begin{equation}
+  \label{eq:vacuum-lambda}
+  Q_{0,0}^{(n)}(u;\Lambda) \;=\; u^{\,n-1}\,(u-\Lambda).
+\end{equation}
+The physical (homogeneous) chain of length $n$ is recovered at
+$\Lambda=0$; the value $\Lambda\to\infty$ instead decouples the new site
+entirely, in the following precise sense.
+
+\subsection{Asymptotic solution at large $\Lambda$}
+
+Every root of every Q-function in the Wronskian construction can be
+tracked, order by order in $1/\Lambda$, by attaching to \emph{each root} a
+formal weight built from the tableau's combinatorics: writing $\theta_m$
+for a single formal deformation parameter attached to tableau entry
+$m\in\{1,\dots,L\}$, one sets
+\begin{equation}
+  \label{eq:theta-rep}
+  q_{a,s,k} \;=\; \Bigl(\prod \text{hook-content ratios of the sub-tableau at }(a,s,k)\Bigr)\,\theta_{m(a,s,k)},
+\end{equation}
+a combinatorial (rational-function-of-diagram-data) weight multiplying the
+single formal parameter of whichever tableau entry that root is
+associated with. Specializing $\theta_m=\Lambda$ for the newest entry
+($m=n$) and $\theta_m=0$ for every earlier entry, and substituting into
+the Wronskian relations \eqref{eq:wronskian-relations} together with
+\eqref{eq:vacuum-lambda}, yields a system that is exactly solvable ---
+typically linear or of very low degree --- because the bulk of the
+tableau's roots are pinned to $\theta_m=0$ and only the newest entry's
+roots carry any $\Lambda$-dependence at all. This closed-form (or
+near-closed-form) solution, valid asymptotically as $\Lambda\to\infty$,
+supplies the starting point for the numerical continuation: no root-finding
+is required to seed it, only the combinatorial evaluation of
+\eqref{eq:theta-rep} on the given tableau.
+
+\subsection{Sequential construction}
+\label{sec:sequential}
+
+The full computation for a target SYT of shape $\lambda\vdash L$
+proceeds inductively on the chain of sub-tableaux obtained by restricting
+the target tableau to entries $\{1\},\{1,2\},\dots,\{1,\dots,L\}$ (the
+tableau's own growth sequence, a saturated chain
+$\emptyset=\lambda^{(0)}\subset\lambda^{(1)}\subset\cdots\subset\lambda^{(L)}=\lambda$
+in Young's lattice):
+\begin{enumerate}
+  \item at $n=1$, the one-site chain is solved by the exact asymptotic
+  construction of the previous subsection, continued (trivially) to
+  $\Lambda=0$;
+  \item at each subsequent $n$, the $(n{-}1)$-site converged solution is
+  held fixed, the new site's inhomogeneity is set to a symbolic $\Lambda$
+  as in \eqref{eq:vacuum-lambda}, the exact large-$\Lambda$ solution
+  \eqref{eq:theta-rep} is evaluated as a numerical starting point at a
+  large finite value of $\Lambda$, and the Wronskian relations are then
+  numerically continued in $\Lambda$ from that large value down to
+  $\Lambda=0$ (Section~\ref{sec:homotopy}), yielding the converged
+  $n$-site solution.
+\end{enumerate}
+Different standard Young tableaux of the same shape correspond to
+different orderings of this box-by-box growth, hence to different
+continuation paths; they are expected, on general representation-theoretic
+grounds, to terminate on the distinct members of the degenerate
+eigenspace associated with that shape. The total computation for one SYT
+is therefore not a single homotopy continuation but a sequence of $L-1$
+of them (the first site requiring none), each a full instance of the
+formalism developed in Section~\ref{sec:homotopy}, seeded by the previous
+one's output.
+
+\begin{example}[Growth sequences for $T_A$ and $T_B$]
+Continuing Example~\ref{ex:shape21}, the two tableaux of shape $(2,1)$
+trace out \emph{different} intermediate shapes on their way to
+$\lambda=(2,1)$, even though they end at the same shape:
+\[
+  T_A=\begin{smallmatrix}1&2\\3&\end{smallmatrix}:
+  \quad \emptyset \to (1) \to (2) \to (2,1),
+  \qquad\qquad
+  T_B=\begin{smallmatrix}1&3\\2&\end{smallmatrix}:
+  \quad \emptyset \to (1) \to (1,1) \to (2,1).
+\]
+Both start identically (a single site, trivially continued) and end
+identically (three sites, shape $(2,1)$), but their \emph{second} step
+continues from a one-site chain to a genuinely different two-site
+sub-problem: $T_A$'s second site is added to the first row (an
+intermediate shape $(2)$, with no second row yet, hence a trivial,
+un-nested Q-system at that step), while $T_B$'s second site opens the
+second row (an intermediate shape $(1,1)$, already carrying one nesting
+level). This concretely illustrates why the two tableaux, despite sharing
+a final shape and hence a final set of Wronskian relations
+\eqref{eq:wronskian-relations}, are continued along different paths and
+are expected to converge on the two distinct eigenstates that shape
+$(2,1)$'s degenerate multiplet contains.
+\end{example}
+
+\subsection{Extraction of Bethe roots}
+\label{sec:root-extraction}
+
+Once the coefficients of every node have been recovered in the generic
+basis $\{c_{a,s,k}\}$ (Section~\ref{sec:bases}) at the physical point
+$\Lambda=0$ for the full tableau, the Bethe roots themselves are the
+zeros of the \emph{first-column} Q-functions,
+\begin{equation}
+  \label{eq:bethe-roots}
+  Q_{w,0}(u) \;=\; 0, \qquad w=1,\dots,(\text{number of rows of }\lambda)-1,
+\end{equation}
+one independent root set per nesting level $w$, consistent with a nested
+Bethe ansatz of rank equal to the number of rows of the diagram.
+
+
+%=============================================================================
+\section{Rigged Configurations, the String Hypothesis, and a Flip Symmetry}
+\label{sec:rc}
+%=============================================================================
+
+\subsection{Strings and vacancy numbers}
+
+Independently of the Wronskian construction above, the classical
+\emph{string hypothesis} conjectures that solutions of the (ordinary,
+non-super) nested Bethe equations organize into \textbf{strings}: for each
+node $a$ of the auxiliary root system, a collection of complex roots
+sharing a common real center $v$ and equally spaced along the imaginary
+direction,
+\begin{equation}
+  \label{eq:string}
+  u_k \;=\; v - \frac{i}{2}(s-1-2k), \qquad k=0,1,\dots,s-1,
+\end{equation}
+for a string of length $s$. A configuration of strings is encoded
+combinatorially by a \textbf{rigged configuration}: for each node $a$ and
+each string length $s$, a nonnegative integer multiplicity
+$n^{(a)}_s$ together with, for every one of those $n^{(a)}_s$ strings, an
+integer \textbf{rigging} $J\in\{0,1,\dots,P^{(a)}_s\}$ bounded by the
+node's \textbf{vacancy number}
+\begin{equation}
+  \label{eq:vacancy}
+  P^{(a)}_s \;=\; \delta_{a,1}\,L \;-\; \sum_{b} A_{ab}\sum_{s'} \min(s,s')\, n^{(b)}_{s'},
+\end{equation}
+where $A_{ab}$ is the Cartan matrix of the auxiliary (type-$A_{n-1}$, in
+the cases implemented here) root system. Equation~\eqref{eq:vacancy} is
+the standard counting-function/vacancy formula of the string hypothesis:
+$\delta_{a,1}L$ is the leading contribution of the physical chain to the
+first node, and the Cartan-matrix contraction against the ``string-string
+scattering kernel'' $\min(s,s')$ subtracts, for every other string present
+at neighboring nodes, the number of momentum slots it excludes at node
+$a$. A rigging $J$ for a given string is then, in the usual
+interpretation, a choice of one of the $P^{(a)}_s+1$ admissible mode
+numbers left available after this exclusion --- exactly analogous to
+filling single-particle levels subject to a generalized Pauli principle.
+The number of admissible riggings for a fixed string-length content is
+therefore
+\begin{equation}
+  \label{eq:kostka-count}
+  \prod_{a,s} \binom{P^{(a)}_s + n^{(a)}_s}{n^{(a)}_s},
+\end{equation}
+a product of binomial coefficients that (summed appropriately over all
+admissible string contents of a given node) reproduces the Kostka-number
+counting of standard Young tableaux --- the combinatorial statement of
+completeness of the Bethe ansatz.
+
+\begin{example}[Vacancy numbers for $\lambda=(2,1)$]
+\label{ex:vacancy21}
+The shape $(2,1)$ of Example~\ref{ex:shape21} has a single nesting level
+(Eq.~\eqref{eq:bethe-roots}), so its auxiliary root system has a single
+node $a=1$, with Cartan entry $A_{11}=2$. Consider the string content with
+one string of length $s=1$ and nothing else, $n^{(1)}_1=1$: by
+\eqref{eq:vacancy},
+\[
+  P^{(1)}_1 \;=\; \delta_{1,1}\cdot 3 \;-\; A_{11}\cdot\min(1,1)\cdot n^{(1)}_1
+  \;=\; 3 - 2\cdot1\cdot1 \;=\; 1,
+\]
+so the single string's rigging can be $J=0$ or $J=1$: exactly
+$\binom{P+n}{n}=\binom{1+1}{1}=2$ admissible riggings, matching the two
+standard Young tableaux $T_A,T_B$ of that shape one for one. This is the
+smallest nontrivial instance of the general fact
+\eqref{eq:kostka-count}: the rigged-configuration count of admissible
+riggings for a fixed string content reproduces the number of standard
+Young tableaux of the corresponding shape.
+\end{example}
+
+\subsection{The Kerov--Kirillov--Reshetikhin bijection}
+
+The \textbf{Kerov--Kirillov--Reshetikhin (KKR) bijection} is a classical,
+constructive correspondence between rigged configurations and standard
+Young tableaux (equivalently, crystal paths in a tensor product of
+single-box representations). The project implements both directions of
+this bijection explicitly, following the classical algorithm: recursively
+remove (or add) the box associated with the current largest (or next)
+tableau entry, choosing at each step the unique \emph{singular} string ---
+one whose rigging equals its vacancy number exactly --- as the string a
+box is added to or removed from, and updating every vacancy number via
+\eqref{eq:vacancy} after each such move. The construction converts a
+rigged configuration into explicit \textbf{mode numbers} for each string
+(via a further shift of the rigging by the vacancy number and the string
+index) which, through the string ansatz \eqref{eq:string}, give an
+explicit approximate (string-hypothesis) prediction for the Bethe roots
+associated with a tableau, independent of the exact Wronskian
+construction of Sections~\ref{sec:qsystem}--\ref{sec:susy}.
+
+\subsection{A flip involution and a conjectured root symmetry}
+\label{sec:flip}
+
+Complementing every string's rigging against its own vacancy number,
+\begin{equation}
+  \label{eq:flip}
+  J \;\longmapsto\; P^{(a)}_s - J,
+\end{equation}
+applied simultaneously to every string of a rigged configuration, defines
+an involution on rigged configurations (and, via the KKR bijection, an
+involution on standard Young tableaux of a fixed shape), which we denote
+$\mathrm{SYT}\mapsto\mathrm{Flip}(\mathrm{SYT})$.
+
+\begin{conjecture}[Root negation under the flip]
+\label{conj:flip}
+For a standard Young tableau $\mathrm{SYT}$ with Bethe roots
+$\{u_1,\dots,u_r\}$ (at any fixed nesting level), the flipped tableau's
+Bethe roots satisfy
+\begin{equation}
+  \{u_1,\dots,u_r\} \;=\; \{-u_1,\dots,-u_r\}
+  \quad\text{as computed for }\mathrm{Flip}(\mathrm{SYT}).
+\end{equation}
+\end{conjecture}
+
+This statement is not derived in the codebase from first principles; it
+is used purely as an \emph{empirical, numerically checked} consistency
+condition (Section~\ref{sec:validation-flip}). Combinatorially, the flip
+\eqref{eq:flip} coincides, on standard Young tableaux, with
+\textbf{Sch\"utzenberger evacuation} --- the classical involution obtained
+by repeatedly removing the box containing the tableau's smallest entry via
+jeu-de-taquin slides and relabeling --- a fact from crystal-base theory
+(evacuation realizes the crystal-graph analogue of complex conjugation of
+the underlying representation). The project exploits this coincidence
+purely as a fast, dependency-free way to compute the flipped tableau
+without constructing its rigged configuration explicitly, and treats
+Conjecture~\ref{conj:flip} as an independent numerical cross-check on the
+Wronskian-continuation output of Sections~\ref{sec:qsystem}--\ref{sec:asymptotics}
+rather than as a derivation of it.
+
+
+%=============================================================================
+\section{Numerical Continuation: Formalism and Realization}
+\label{sec:homotopy}
+%=============================================================================
+
+\subsection{A concrete warm-up example}
+\label{sec:warmup}
+
+Before setting up the general formalism, it is worth fixing ideas with the
+simplest possible instance, reproduced directly from the project's own
+introductory material. Take the target system
+\begin{equation}
+  \label{eq:toy-target}
+  F(x,y) \;=\; \begin{pmatrix} x^2+y^2-1 \\ x+y \end{pmatrix} \;=\; 0,
+\end{equation}
+i.e.\ the intersection of the unit circle with the line $y=-x$, with
+exact solutions $(x,y)=(\pm\tfrac{1}{\sqrt2},\mp\tfrac{1}{\sqrt2})$. This
+system has no free parameter to continue in, so one instead introduces an
+artificial \emph{start system} $G(x,y)=0$ of the same degrees ($2$ and
+$1$, respectively) with known solutions --- a \textbf{total-degree start
+system} --- and a homotopy $H=(1-t)F+tG$ exactly as in
+\eqref{eq:homotopy-general} below. Bézout's theorem bounds the number of
+solution paths that must be tracked by the product of the two degrees,
+$2\times1=2$; correspondingly there are two start points to track, one
+per path, from $t=1$ down to $t=0$. Tracking both paths with an adaptive
+multiple-precision corrector (as described below) recovers the two exact
+intersection points to the tracker's tolerance, with real parts
+$\approx\pm0.70710678\ldots=\pm1/\sqrt2$ --- this is exactly what one
+finds running Bertini on \eqref{eq:toy-target}, and it is the same
+mechanism, applied to a genuine polynomial system with no natural
+deformation parameter of its own, that Section~\ref{sec:parameter-homotopy}
+specializes to the project's actual problem, where instead of an
+artificial start system one already has an \emph{exact} solution at
+$\Lambda=\Lambda_0$ to continue from.
+
+\subsection{Homotopy continuation and the Davidenko equation}
+
+Let $F:\mathbb{C}^N\to\mathbb{C}^N$ be the target polynomial system (here,
+the Wronskian relations \eqref{eq:wronskian-relations} at $\Lambda=0$,
+in the coefficients $\gamma$ of Section~\ref{sec:bases}), and let $G$ be a
+\emph{start system} with known solution(s), continuously connected to $F$
+by a homotopy
+\begin{equation}
+  \label{eq:homotopy-general}
+  H(x,t) \;=\; (1-t)\,F(x) + t\,G(x), \qquad t\in[0,1],
+\end{equation}
+so that $H(x,1)=G(x)$ and $H(x,0)=F(x)$. Assuming the solution path
+$x(t)$ defined implicitly by $H(x(t),t)=0$ is smooth, differentiating with
+respect to $t$ gives the \textbf{Davidenko differential equation},
+\begin{equation}
+  \label{eq:davidenko}
+  J_x H\bigl(x(t),t\bigr)\, \dot x(t) \;+\; \partial_t H\bigl(x(t),t\bigr) \;=\; 0
+  \quad\Longrightarrow\quad
+  \dot x(t) \;=\; -\bigl[J_x H(x(t),t)\bigr]^{-1}\,\partial_t H\bigl(x(t),t\bigr),
+\end{equation}
+an ordinary differential equation for the path $x(t)$, provided the
+Jacobian $J_x H$ remains nonsingular along the path. Numerically tracking
+the path from $t=1$ to $t=0$ then reduces to (i) a \textbf{predictor} step
+that numerically integrates \eqref{eq:davidenko} by one of the standard
+explicit ODE schemes, and (ii) a \textbf{corrector} step that removes the
+resulting drift off the true solution path by Newton iteration,
+\begin{equation}
+  \label{eq:newton}
+  x_{k+1} \;=\; x_k \;-\; \bigl[J_x H(x_k,t)\bigr]^{-1} H(x_k,t),
+\end{equation}
+applied at fixed $t$ until convergence to a specified tolerance. This
+predictor--corrector scheme, together with \emph{adaptive} control of both
+the step size in $t$ and the working numerical precision (raised whenever
+the Jacobian in \eqref{eq:newton} becomes ill-conditioned, as happens near
+a path singularity), is exactly what Bertini's \textbf{adaptive
+multiple-precision tracker} (``AMPTracker'') implements; the several
+named predictors available (constant, Euler, Heun, and a family of
+embedded Runge--Kutta schemes of increasing order) are simply different
+choices of explicit ODE integrator for \eqref{eq:davidenko}, trading
+predictor accuracy (and hence achievable step size) against per-step
+cost.
+
+\subsection{Specialization: a linear parameter homotopy in $\Lambda$}
+\label{sec:parameter-homotopy}
+
+The construction of Section~\ref{sec:asymptotics} is a particularly
+favorable instance of \eqref{eq:homotopy-general}: rather than requiring
+an artificial start system, the Wronskian relations
+\eqref{eq:wronskian-relations}, left symbolic in $\Lambda$, already
+constitute a one-parameter polynomial family $F_\Lambda(\gamma)=0$ whose
+member at a large value $\Lambda=\Lambda_0$ has the exact combinatorial
+solution of Section~\ref{sec:asymptotics}, and whose member at $\Lambda=0$
+is the physical system. Introducing the affine reparametrization
+\begin{equation}
+  \label{eq:param-path}
+  \Lambda(t) \;=\; (1-t)\cdot 0 + t\cdot\Lambda_0 \;=\; t\,\Lambda_0, \qquad t\in[0,1],
+\end{equation}
+gives $H(\gamma,t):=F_{\Lambda(t)}(\gamma)$, with $H(\gamma,1)=F_{\Lambda_0}(\gamma)$
+solved exactly and $H(\gamma,0)=F_0(\gamma)$ the target; exactly one path
+is tracked (there is no Bézout-number multiplicity of start points to
+enumerate, since the start point is already known exactly), from $t=1$ to
+$t=0$. This is the parameter homotopy actually solved by the numerical
+back end: the polynomial system exported at each step of the sequential
+construction (Section~\ref{sec:sequential}) is $F_\Lambda(\gamma)$ with
+$\Lambda$ left as the single homotopy variable and \eqref{eq:param-path}
+substituted in symbolically before the system is handed to the tracker,
+together with the exact starting value $\gamma(\Lambda_0)$ from
+Section~\ref{sec:asymptotics} as the $t=1$ start point.
+
+\subsection{Numerical safeguards}
+
+Two safeguards are imposed around the tracked endpoint before it is
+accepted as a physical solution. First, since the physical Bethe roots
+recovered downstream (Eq.~\eqref{eq:bethe-roots}) are real linear
+combinations of the tracked coefficients for the tableaux considered here,
+each returned coefficient $\gamma=\gamma_{\mathrm{re}}+i\gamma_{\mathrm{im}}$
+is required to satisfy
+\begin{equation}
+  \label{eq:real-check}
+  |\gamma_{\mathrm{im}}| \;\le\; \varepsilon_{\mathrm{track}}\cdot\max(1,|\gamma_{\mathrm{re}}|),
+\end{equation}
+for the tracker's own tolerance $\varepsilon_{\mathrm{track}}$, with any
+violation (or any non-finite value) aborting the run rather than
+silently truncating an unexpectedly complex endpoint. Second, every
+numerical result is published to disk only by an atomic replace of a
+completed temporary file, so that a reader can never observe a partially
+written solution, and a failed or timed-out continuation simply leaves no
+new output rather than a corrupted one.
+
+\subsection{A path-tracking failure mode: branch jumps}
+\label{sec:branch-jump-formal}
+
+The predictor--corrector scheme of \eqref{eq:davidenko}--\eqref{eq:newton}
+is only guaranteed to follow the correct solution branch if the step size
+in $t$ is small enough, relative to the local curvature of the path and
+the separation of nearby solution branches, for the corrector to converge
+back to the \emph{same} branch the predictor was following. When this
+fails --- typically because the path passes close to another solution
+branch or to a singularity of the discriminant locus --- the tracker can
+converge to a numerically valid but physically incorrect solution: a
+\emph{branch jump}. Empirically, for a pair of tableaux related by the
+flip involution of Section~\ref{sec:flip} (whose roots are conjectured to
+be exact negatives of one another, Conjecture~\ref{conj:flip}), starting
+the continuation from a substantially larger $\Lambda_0$ and tracking at
+higher precision and tighter tolerance was found to eliminate an observed
+branch-jump discrepancy entirely (Section~\ref{sec:validation-flip}); both
+adjustments reduce, respectively, the total path length that must be
+tracked and the size of the correction the Newton step must make at each
+point along it, and so plausibly reduce the risk of such a jump, though
+neither is a formal guarantee against it in general.
+
+\begin{remark}[Why extra precision helps]
+It is worth making the mechanism a little more concrete. Two solution
+branches that pass close to one another correspond to the Jacobian
+$J_xH(x(t),t)$ in \eqref{eq:newton} becoming nearly singular somewhere
+along the path (formally, the path approaches the \emph{discriminant
+locus} where two roots of the system coincide). Near such a point, the
+Newton correction $[J_xH]^{-1}H$ is the product of a huge, ill-conditioned
+inverse and a small residual, so the correction's accuracy is extremely
+sensitive to round-off in $H$ and $J_xH$ themselves: at fixed (say,
+machine) precision, the correction step can easily be thrown to the
+\emph{wrong} one of the two nearby branches. Raising the working
+precision shrinks the round-off in $H$ and $J_xH$ directly, which is
+exactly what lets the corrector resolve which of the two nearby branches
+it started closest to --- this is the sense in which \emph{adaptive}
+precision (raised locally, only where the path actually passes near such
+a point, rather than uniformly everywhere) is doing real, not merely
+cosmetic, numerical work.
+\end{remark}
+
+
+%=============================================================================
+\section{A Fully Worked Example: the Shape \texorpdfstring{$(2,1)$}{(2,1)}}
+\label{sec:worked-example}
+%=============================================================================
+
+It is worth pausing to see every piece introduced so far --- the degree
+count, the number of nesting levels, the flip involution, and the
+expected root negation --- meet in a single, completely explicit,
+hand-checkable calculation, before turning to the software that automates
+it for shapes too large to solve by hand.
+
+For the purely bosonic marked point $(\lambda_\ast,\nu_\ast)=(2,0)$ of
+Example~\ref{ex:markedpoints21}, the shape $\lambda=(2,1)$ reduces to the ordinary (non-super)
+nested Bethe ansatz for a homogeneous chain of $L=3$ sites, with one
+nesting level and, per Example~\ref{ex:shape21}, a single Bethe root per
+eigenstate. This is precisely the textbook \emph{one-magnon sector} of the
+periodic Heisenberg (XXX) spin chain: a state with a single magnon at
+rapidity $u$ is an eigenstate of the transfer matrix provided the
+periodicity condition
+\begin{equation}
+  \label{eq:one-magnon}
+  \left(\frac{u+\tfrac{i}{2}}{u-\tfrac{i}{2}}\right)^{\!L} \;=\; 1
+\end{equation}
+holds --- the $M=1$ case of the Bethe equations, in which the usual
+scattering factors between magnons are simply absent. At $L=3$,
+clearing denominators in \eqref{eq:one-magnon} gives
+$(u+\tfrac{i}{2})^3=(u-\tfrac{i}{2})^3$, and since
+$a^3-b^3=(a-b)(a^2+ab+b^2)$ with $a-b=i\ne0$, this reduces to the single
+quadratic
+\begin{equation}
+  \label{eq:one-magnon-quadratic}
+  \Bigl(u+\tfrac{i}{2}\Bigr)^{\!2} + \Bigl(u+\tfrac{i}{2}\Bigr)\Bigl(u-\tfrac{i}{2}\Bigr) + \Bigl(u-\tfrac{i}{2}\Bigr)^{\!2}
+  \;=\; 3u^2 - \tfrac14 \;=\; 0,
+  \qquad\Longrightarrow\qquad
+  u \;=\; \pm\frac{1}{2\sqrt3}.
+\end{equation}
+There are exactly two roots, matching the two standard Young tableaux
+$T_A,T_B$ of Example~\ref{ex:shape21} one for one: each tableau's
+degree-one Q-function $Q_{1,0}(u)=u\mp\tfrac{1}{2\sqrt3}$ contributes one
+of the two roots of \eqref{eq:one-magnon-quadratic}, consistent with the
+general multiplicity count of Section~\ref{sec:rc}
+(two admissible riggings, Example~\ref{ex:vacancy21}, for two SYT).
+
+A direct jeu-de-taquin computation (the evacuation algorithm of
+Section~\ref{sec:flip}) confirms that $T_A$ and $T_B$ are each other's
+flip, $\operatorname{Flip}(T_A)=T_B$: removing the box containing entry
+$1$ from $T_A=\{\{1,2\},\{3\}\}$, sliding the resulting hole down and
+relabeling, reproduces $T_B=\{\{1,3\},\{2\}\}$ exactly. Conjecture~\ref{conj:flip}
+therefore predicts $\operatorname{Roots}(T_A)=-\operatorname{Roots}(T_B)$
+--- and indeed the two roots found in
+\eqref{eq:one-magnon-quadratic}, $+\tfrac{1}{2\sqrt3}$ and
+$-\tfrac{1}{2\sqrt3}$, are exact negatives of one another. This is the
+smallest possible instance in which every structural claim of this
+report --- the degree/multiplicity count, the two-tableaux labeling of a
+degenerate multiplet, and the flip-negation symmetry --- can be checked
+by hand, with no numerical continuation required at all (the one-magnon
+equation \eqref{eq:one-magnon} is exactly solvable). For any shape with
+more than one magnon per level, no closed form is available in general,
+and this is exactly where the asymptotic construction and homotopy
+continuation of Sections~\ref{sec:asymptotics}--\ref{sec:homotopy} take
+over.
+
+
+%=============================================================================
+\section{Software Realization}
+\label{sec:implementation}
+%=============================================================================
+
+This section summarizes, at the level of architecture rather than
+implementation detail, how the formalism of Sections~\ref{sec:qsystem}--\ref{sec:homotopy}
+is realized as a working pipeline; it is included for completeness and to
+ground the validation results of Section~\ref{sec:results}, not as a
+substitute for the mathematical description above.
+
+\textbf{Symbolic layer (Wolfram Language).} Given a Young diagram, a
+symbolic layer constructs the Q-system lattice, selects a marked point,
+builds the super-Wronskian expression \eqref{eq:susywronskian}, and
+derives the Wronskian relations \eqref{eq:wronskian-relations} together
+with the two-basis translation of Section~\ref{sec:bases}. A second,
+independent module implements the asymptotic construction of
+Section~\ref{sec:asymptotics} and drives the sequential, box-by-box
+computation of Section~\ref{sec:sequential} for a given standard Young
+tableau, delegating each individual continuation step to a pluggable
+numerical back end.
+
+\textbf{Numerical back end (Bertini, via Python).} At each continuation
+step, the current Wronskian relations (with $\Lambda$ left symbolic per
+\eqref{eq:param-path}) and a high-precision starting point are exported to
+a plain-text table (one polynomial equation per row, each row carrying
+the variable name, its starting value, and its defining expression). A
+Python driver parses this table into a genuine polynomial system, forms
+the parameter path of \eqref{eq:param-path}, and tracks a single path with
+Bertini's adaptive multiple-precision tracker (Section~\ref{sec:homotopy}),
+exposing the tracker's tolerance, precision, step-size, Newton-iteration,
+and predictor-scheme parameters as configurable settings. The converged
+coefficients are validated against the reality condition
+\eqref{eq:real-check} and published atomically; the symbolic layer imports
+them and proceeds to the next site. \emph{(An earlier version of this
+back end delegated the same step to a Julia-based homotopy-continuation
+package; several internal option and file names still reflect that
+earlier design, though the currently used back end is Bertini only.)}
+
+\textbf{Orchestration and batch execution.} A thin orchestration layer
+isolates every numerical global used by the symbolic/asymptotic
+construction on a per-task basis, allocates a dedicated working directory
+and log files per tableau, and records detailed per-stage timing. A
+shell-level batch launcher runs many tableaux (optionally all standard
+Young tableaux of a given shape) as independent, parallel operating-system
+processes, consolidating their individual results into a single aggregate
+table under a file lock, atomically, so that a batch's partial results
+remain safely readable while it is still running; a native desktop
+application provides the same set of operations (single-tableau runs,
+batch runs, the flip cross-check of Section~\ref{sec:validation-flip}, and
+result visualization) through a graphical interface, without introducing
+any code path distinct from the command-line tools.
+
+\textbf{Visualization.} Bethe roots are visualized either in a notebook
+(for interactive inspection and for the negated-overlay comparison used in
+the flip check) or by a small, dependency-free tool that renders each
+nesting level of \eqref{eq:bethe-roots} as a panel of a hand-written
+vector-graphics document, automatically switching to a density-aggregated
+rendering when the number of roots in a batch result is too large to plot
+individually.
+
+\begin{remark}[Why split the pipeline this way]
+The division between a symbolic layer and a numerical back end mirrors the
+division between Sections~\ref{sec:qsystem}--\ref{sec:asymptotics} (which
+never involve floating-point arithmetic --- everything is exact
+combinatorics and exact or symbolic algebra) and
+Section~\ref{sec:homotopy} (the one place genuine numerical
+approximation enters). Consequently, the only interface the two layers
+need is the plain-text polynomial table described above: the symbolic
+layer never needs to know \emph{how} a step's solution was obtained, only
+that it converged, which is precisely what allowed the back end to be
+replaced (Section~\ref{sec:implementation}'s remark on the earlier Julia
+back end) without touching the mathematics of
+Sections~\ref{sec:qsystem}--\ref{sec:asymptotics} at all.
+\end{remark}
+
+
+%=============================================================================
+\section{Validation and Numerical Results}
+\label{sec:results}
+%=============================================================================
+
+\subsection{Regression testing}
+
+The numeric-string handling between Bertini's long-decimal output and the
+symbolic layer's arbitrary-precision numbers is directly tested: a
+100-digit decimal value is required to round-trip through export and
+import with every digit intact, standard and scientific notations are
+required to parse correctly, and malformed or non-finite input is
+required to be rejected rather than silently coerced. Separately, a suite
+of saved reference tableaux is rerun from scratch and compared against
+their saved solutions \emph{level by level} (per Eq.~\eqref{eq:bethe-roots},
+never flattened across nesting levels), using an exhaustive one-to-one
+matching over root permutations at a default tolerance of $10^{-8}$.
+
+\subsection{Validation of Conjecture~\ref{conj:flip}: the flip check}
+\label{sec:validation-flip}
+
+The empirical symmetry of Conjecture~\ref{conj:flip} is checked
+numerically by computing, for a tableau and its flip, the
+\textbf{symmetric Hausdorff distance} between one root set and the
+negation of the other,
+\begin{equation}
+  \label{eq:hausdorff}
+  d_H(A,B) \;=\; \max\Bigl\{\, \max_{a\in A}\min_{b\in B}|a-b| ,\;\; \max_{b\in B}\min_{a\in A}|a-b| \,\Bigr\},
+  \qquad B=-\operatorname{Roots}[\mathrm{Flip}(\mathrm{SYT})],
+\end{equation}
+computed at high (100-digit) arithmetic precision, with a default pass
+tolerance of $10^{-5}$; the check is applied automatically, at the level
+of a whole aggregate batch of tableaux, and any pair exceeding tolerance
+can be flagged and removed as a likely branch-jump artifact
+(Section~\ref{sec:branch-jump-formal}). This is exactly the automated,
+large-scale counterpart of the by-hand check carried out in
+Section~\ref{sec:worked-example}: there, $d_H$ applied to
+$\{+\tfrac{1}{2\sqrt3}\}$ and $-\{-\tfrac{1}{2\sqrt3}\}$ vanishes
+identically, since the two single-element sets are literally equal;
+for shapes too large to solve in closed form, the same comparison is
+instead carried out numerically, at whatever precision the continuation
+was run at, on every flip-related pair in a batch.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+Young diagram & Tableau & Max.\ root difference \\
+\midrule
+$\{3,2,1\}$ & $\{\{1,2,6\},\{3,4\},\{5\}\}$ & $4.7\times10^{-17}$ \\
+$\{3,2,1\}$ & $\{\{1,2,6\},\{3,5\},\{4\}\}$ & $2.9\times10^{-17}$ \\
+$\{4,2,1\}$ & $\{\{1,2,3,4\},\{5,6\},\{7\}\}$ & $1.4\times10^{-14}$ \\
+\bottomrule
+\end{tabular}
+\caption{Maximum one-to-one root differences (level by level) between freshly recomputed and saved reference solutions, all well below the $10^{-8}$ pass tolerance used for the comparison.}
+\label{tab:accuracy}
+\end{table}
+
+Table~\ref{tab:accuracy} reports a representative set of from-scratch
+reruns compared against saved reference solutions; all three cases agree
+to well within tolerance. This establishes agreement with previously
+computed (and themselves once machine-precision-validated) references to
+the stated tolerance; it does not, by itself, certify absolute accuracy at
+the full working precision used internally.
+
+\subsection{Performance profile of a single tableau}
+
+Table~\ref{tab:profile} reports a non-overlapping timing breakdown for one
+complete computation of a seven-box tableau, totaling $8.95\,\mathrm{s}$,
+with recovered roots matching a saved reference to within
+$6.6\times10^{-17}$.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Category & Seconds & Share \\
+\midrule
+Symbolic (Wolfram Language) construction \& equation preparation & 3.43 & 38.3\% \\
+Bertini path tracking & 0.92 & 10.3\% \\
+Other back-end process overhead & 1.04 & 11.6\% \\
+Kernel launch/load/finalization overhead & 3.57 & 39.9\% \\
+\bottomrule
+\end{tabular}
+\caption{Timing breakdown for one small tableau. Bertini's own path-tracking cost is a modest fraction of the total; fixed per-call kernel and symbolic-preparation overhead dominates at this problem size.}
+\label{tab:profile}
+\end{table}
+
+For this particular (small) example, fixed overhead --- Wolfram Language
+kernel initialization and one-time symbolic-preparation cost --- dominates
+the wall-clock time, while the genuine numerical continuation cost
+(Bertini path tracking) is comparatively small; this conclusion is
+specific to the profiled example and has not been established for
+substantially larger Young diagrams, where the polynomial degrees, and
+hence the intrinsic path-tracking cost, grow.
+
+
+%=============================================================================
+\section{Discussion}
+\label{sec:discussion}
+%=============================================================================
+
+\subsection{Summary}
+
+We have given a formal account of the Q-system/Wronskian construction
+used to solve the (supersymmetric) nested Bethe ansatz equations for
+eigenstates labeled by standard Young tableaux: Q-functions built as
+Casoratian determinants of a shared linear difference problem obey
+conservation-law-type bilinear identities under the shift $u\to u\pm i$
+(Eq.~\eqref{eq:wronskian-conservation}), the discrete analogue of which,
+for the graded (bosonic/fermionic) elementary blocks of
+Section~\ref{sec:susy}, generates the full Q-system by the Wronskian
+recursion \eqref{eq:reduction-bos}--\eqref{eq:reduction-ferm}; the marked-point
+freedom in splitting elementary building blocks into bosonic and
+fermionic families corresponds to a choice of Kac--Dynkin grading; a
+single chain inhomogeneity, continued from an asymptotically exact
+combinatorial solution down to the physical homogeneous point, converts
+the remaining numerical work into a sequence of parameter homotopy
+continuations, formalized through the Davidenko equation and realized
+numerically by Bertini's adaptive multiple-precision tracker; and an
+independent rigged-configuration/string-hypothesis combinatorics supplies
+both an approximate analytic cross-check and an exact combinatorial
+symmetry (the flip involution) used as an empirical validation criterion.
+
+\subsection{Limitations}
+
+The physical identity of the bosonic/fermionic split (Remark following
+Eq.~\ref{eq:susywronskian}) could not be settled from the codebase alone.
+The flip symmetry of Conjecture~\ref{conj:flip} is used, and validated
+numerically, but is not derived here from the representation theory of
+the underlying algebra. The branch-jump failure mode of
+Section~\ref{sec:branch-jump-formal} is mitigated by more conservative
+continuation settings but is not eliminated by any formal guarantee, and
+should continue to be screened for via the flip check on any newly
+computed batch of tableaux. Performance characterization to date covers
+only small tableaux; whether fixed overhead continues to dominate genuine
+path-tracking cost at large Young-diagram size remains open.
+
+\subsection{Outlook}
+
+Two directions follow directly from the results above. First, since the
+dominant cost observed in Table~\ref{tab:profile} is fixed per-call
+overhead rather than path-tracking time, reusing a single initialized
+symbolic-layer worker across many tableaux (rather than paying kernel
+startup once per tableau) is a natural, low-risk optimization for batch
+computations. Second, extending the performance profile of
+Section~\ref{sec:results} to substantially larger Young diagrams would
+determine whether the numerical continuation itself, rather than fixed
+overhead, becomes the dominant cost once the Q-system's polynomial
+degrees grow, which would in turn indicate where further numerical
+effort (tighter path-tracking control, higher base precision, or an
+adaptive step-size schedule tuned specifically to this problem's
+observed branch-jump risk) is best directed.
+
+\end{document}

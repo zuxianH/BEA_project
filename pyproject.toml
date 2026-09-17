@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bae-bertini"
+version = "0.1.0"
+description = "Bethe-ansatz continuation with Wolfram, Bertini, and Streamlit"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.50,<2", "plotly>=5.24,<7"]
+solver = ["bertini2"]
+notebooks = ["matplotlib", "ipykernel"]
+
+[project.scripts]
+bertini-studio = "bae_bertini.launcher:main"
+bertini-continue = "bae_bertini.continuation:main"
+bertini-check-flips = "bae_bertini.flip_checks:main"
+bertini-merge = "bae_bertini.results:main"
+bertini-plot-roots = "bae_bertini.roots:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
