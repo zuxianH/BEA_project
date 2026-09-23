@@ -463,6 +463,7 @@ result = RunSingleSYT[
   SaveBetheRootsBySYT -> saveFinalSYTFile,
   SaveWorkflowTimingCSV -> saveWorkflowTimingCSV,
   CleanupWorkDir -> BertiniEnvTrueQ["BERTINI_CLEANUP_RUNS"],
+  WorkDir -> BertiniEnvString["BERTINI_WORK_DIR", Automatic],
   JuliaTimeout -> BertiniEnvNumber["BERTINI_TIMEOUT", 900],
   ResultSYTDirectory -> subSYTResultDirectory
 ];

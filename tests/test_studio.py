@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from bae_bertini.config import Configuration, MODES
 from bae_bertini.paths import ROOT
 from bae_bertini.jobs import RunManager
-from bae_bertini.ui.plots import root_figure
+from bae_bertini.ui.plots import root_figure, all_roots_figure
 from streamlit.testing.v1 import AppTest
 
 
@@ -33,6 +33,27 @@ class PlotTests(unittest.TestCase):
         self.assertFalse(root_figure('{}')[0].data)
         with self.assertRaises(ValueError):
             root_figure('not roots')
+
+    def test_all_roots_preserve_levels_labels_and_report_skipped_rows(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'all.csv'
+            with path.open('w') as stream:
+                writer = csv.DictWriter(stream, fieldnames=['Tableau', 'SucceededQ', 'BetheRoots'])
+                writer.writeheader()
+                for tableau, success, roots in [
+                    ('A', 'true', '{{1+2*I,1e999},{3}}'),
+                    ('B', 'true', '{{4},{5}}'),
+                    ('failed', 'false', '{{99}}'),
+                    ('invalid', 'true', 'bad'),
+                    ('empty', 'true', '{}'),
+                ]:
+                    writer.writerow(dict(Tableau=tableau, SucceededQ=success, BetheRoots=roots))
+            figure, counts = all_roots_figure(path)
+        self.assertEqual(counts, dict(total=5, plotted=2, failed=1, invalid=2, omitted=1))
+        self.assertEqual(list(figure.data[0].x), [1, 4])
+        self.assertEqual(list(figure.data[1].x), [3, 5])
+        self.assertEqual([list(label) for label in figure.data[0].customdata], [['A', 1], ['B', 2]])
+        self.assertEqual(figure.layout.yaxis.scaleanchor, 'x')
 
 
 class RuntimeTests(unittest.TestCase):
@@ -93,7 +114,7 @@ class BrowserTests(unittest.TestCase):
         app.selectbox(key='mode').select(MODES[1]).run()
         app.text_input(key='jobs').set_value('3').run()
         app.text_input(key='setting_WORKING_PRECISION').set_value('200').run()
-        for mode in (MODES[3], MODES[0], MODES[2], MODES[4], MODES[1]):
+        for mode in (MODES[3], MODES[5], MODES[0], MODES[2], MODES[4], MODES[1]):
             app.selectbox(key='mode').select(mode).run()
             self.assertFalse(app.exception, mode)
         self.assertEqual(app.text_input(key='jobs').value, '3')
@@ -137,6 +158,26 @@ class BrowserTests(unittest.TestCase):
             app.run()
             self.assertEqual(len(reads), 2)
         self.assertFalse(app.exception)
+
+    def test_all_tableaux_reads_beyond_preview_and_refreshes_when_csv_changes(self):
+        with self.path.open('a') as stream:
+            writer = csv.DictWriter(stream, fieldnames=['Tableau', 'SucceededQ', 'BetheRoots'])
+            for index in range(500):
+                writer.writerow(dict(Tableau=f'T{index}', SucceededQ='true', BetheRoots='{{4},{5}}'))
+        app = self.app.run()
+        app.checkbox(key='plot_all').check().run()
+        self.assertFalse(app.exception)
+        self.assertEqual(len(app.get('plotly_chart')), 1)
+        self.assertTrue(any('501 of 502 rows plotted' in c.value for c in app.caption))
+        self.assertTrue(any('Skipped 1 unsuccessful' in w.value for w in app.warning))
+        self.assertFalse(any(s.label == 'Tableau' for s in app.selectbox))
+        with self.path.open('a') as stream:
+            stream.write('last,true,{{42}}\n')
+        app.run()
+        self.assertTrue(any('502 of 503 rows plotted' in c.value for c in app.caption))
+        app.checkbox(key='plot_all').uncheck().run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any(s.label == 'Tableau' for s in app.selectbox))
 
     def test_run_and_stop_controls_survive_reruns(self):
         with patch('bae_bertini.config.check_dependencies', return_value=[]), \

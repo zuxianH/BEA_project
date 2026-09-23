@@ -50,6 +50,20 @@ class InputTests(unittest.TestCase):
         self.assertEqual(env['BERTINI_MAX_STEP_SIZE'], '1/200')
         self.assertEqual(env['BERTINI_RESULT_SYT_DIR'], env['CROSSCHECK_RESULT_SYT_DIR'])
 
+    def test_reverse_continuation_command(self):
+        args, env = Configuration(mode=MODES[5], input='[[1,3],[2]]', tolerance='1e-8').command()
+        self.assertEqual(args[1:], ['-m', 'bae_bertini.reverse_check', '--tolerance', '1e-8', '{{1,3},{2}}'])
+        self.assertEqual(env['BERTINI_INITIAL_LAMBDA'], BATCH['INITIAL_LAMBDA'])
+
+    def test_reverse_continuation_returns_to_start(self):
+        from bae_bertini.reverse_check import reverse_check
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / 'initial_data.csv'
+            source.write_text('syt,lambda0,var,Initialvar,expression\n"{{1}}",4,x,2,x**2 - h\n')
+            lines, passed = reverse_check(source, '1', '1e-6')
+        self.assertTrue(passed)
+        self.assertIn('Path=lambda 4 -> 1 -> 4', lines)
+
     def test_batch_partitions_and_rerun(self):
         args, _ = Configuration(mode=MODES[1], input='{3,2,1}', jobs='2', partition='3', parts='9', rerun=True).command()
         self.assertIn('--rerun-existing', args)

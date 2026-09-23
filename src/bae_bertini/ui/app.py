@@ -11,7 +11,7 @@ from bae_bertini import config as configuration
 from bae_bertini.config import BATCH, MODES, PREDICTORS, Configuration, preview
 from bae_bertini.paths import ROOT, STATE, REFERENCES
 from bae_bertini.results import read_results
-from bae_bertini.ui.plots import root_figure
+from bae_bertini.ui.plots import root_figure, all_roots_figure
 from bae_bertini.jobs import RunManager, local_path
 
 
@@ -77,7 +77,11 @@ def calculation_form():
             right.text_input('Total partitions', key='parts')
             st.checkbox('Rerun existing tableaux', key='rerun')
         if mode in MODES[3:]:
-            st.text_input('Flip comparison tolerance', key='tolerance')
+            st.text_input('Reverse comparison tolerance' if mode == MODES[5] else 'Flip comparison tolerance',
+                          key='tolerance')
+        if mode == MODES[5]:
+            st.caption('Solves λ start → target, tracks that solution back to the starting λ, and '
+                       'reports its Hausdorff distance from the original starting solution.')
         st.divider()
         st.subheader('Numerical settings')
         left, right = st.columns(2)
@@ -188,6 +192,11 @@ def result_rows(path, modified, size):
     return read_results(path)
 
 
+@st.cache_data(max_entries=2, show_spinner='Loading roots from the full CSV…')
+def all_result_roots(path, modified, size):
+    return all_roots_figure(path, revision=f'{path}:{modified}:{size}:all')
+
+
 def choose_row(paths, prefix):
     path = st.selectbox('Result CSV' if prefix == 'a' else 'Comparison CSV', paths,
                         format_func=lambda p: p.name, key=prefix + '_file')
@@ -195,14 +204,16 @@ def choose_row(paths, prefix):
     rows, truncated = result_rows(str(path), info.st_mtime_ns, info.st_size)
     if not rows:
         st.info('This CSV has no result rows.')
-        return path, None, rows
+        return path, None, rows, False
     st.caption(f'{len(rows)} rows loaded' + (' · preview limited to the first 500 rows' if truncated else ''))
+    if prefix == 'a' and st.checkbox('Plot all tableaux in this CSV', key='plot_all'):
+        return path, None, rows, True
     index = st.selectbox(
         'Tableau' if prefix == 'a' else 'Comparison tableau', range(len(rows)),
         format_func=lambda i: f'{i + 1}. {rows[i].get("Tableau", "(no tableau)")} · {rows[i].get("SucceededQ", "unknown")}',
         key=prefix + '_row_' + str(path),
     )
-    return path, rows[index], rows
+    return path, rows[index], rows, False
 
 
 def results_browser():
@@ -222,22 +233,34 @@ def results_browser():
         if not paths:
             st.info('No CSV files here yet. Choose an existing results folder or run a calculation.')
             return
-        path, row, rows = choose_row(paths, 'a')
-        if row is None:
+        path, row, rows, plot_all = choose_row(paths, 'a')
+        if not rows:
             return
         a, b, c = st.columns(3)
         a.metric('Result files', len(paths))
         b.metric('Rows in preview', len(rows))
-        c.metric('Selected result', 'Succeeded' if row.get('SucceededQ', '').lower() == 'true' else 'Not successful')
+        if not plot_all:
+            c.metric('Selected result', 'Succeeded' if row.get('SucceededQ', '').lower() == 'true' else 'Not successful')
         comparison = None
         negate = False
-        if st.checkbox('Compare with another result'):
-            _, comparison_row, _ = choose_row(paths, 'b')
+        if not plot_all and st.checkbox('Compare with another result'):
+            _, comparison_row, _, _ = choose_row(paths, 'b')
             comparison = comparison_row.get('BetheRoots', '') if comparison_row else None
             negate = st.checkbox('Negate A for a sign-flip comparison (−A vs B)', value=True)
         try:
-            figure, omitted = root_figure(row.get('BetheRoots', ''), comparison, negate,
-                                          revision=str(path) + str(row.get('Tableau', '')))
+            if plot_all:
+                info = path.stat()
+                figure, counts = all_result_roots(str(path), info.st_mtime_ns, info.st_size)
+                omitted = counts['omitted']
+                c.metric('Tableaux plotted', counts['plotted'])
+                st.caption(f"Full CSV: {counts['plotted']} of {counts['total']} rows plotted. "
+                           'Colors identify root levels; hover over a point to see its tableau.')
+                if counts['failed'] or counts['invalid']:
+                    st.warning(f"Skipped {counts['failed']} unsuccessful rows and "
+                               f"{counts['invalid']} rows with invalid or no finite roots.")
+            else:
+                figure, omitted = root_figure(row.get('BetheRoots', ''), comparison, negate,
+                                              revision=str(path) + str(row.get('Tableau', '')))
             if figure.data:
                 st.plotly_chart(figure, width='stretch',
                                 config={'scrollZoom': True, 'displaylogo': False,
@@ -249,8 +272,9 @@ def results_browser():
                 st.warning(f'{omitted} non-finite roots omitted from the plot.')
         except (ValueError, TypeError, OverflowError) as exc:
             st.warning(f'Root plot unavailable: {exc}')
-        with st.expander('Full precision row', expanded=True):
-            st.code('\n\n'.join(f'{key}\n{value}' for key, value in row.items()), language='text')
+        if row is not None:
+            with st.expander('Full precision row', expanded=True):
+                st.code('\n\n'.join(f'{key}\n{value}' for key, value in row.items()), language='text')
         with st.expander('CSV preview'):
             st.dataframe(rows, width='stretch')
         # Avoid reading very large aggregate CSVs just to display the page.
@@ -262,11 +286,11 @@ def results_browser():
 
 
 def main():
-    st.set_page_config(page_title='Bertini Calculation Studio', page_icon='🧮', layout='wide')
+    st.set_page_config(page_title='WBE Studio', page_icon='🧮', layout='wide')
     initialize()
     if 'next_browse_folder' in st.session_state:
         st.session_state['browse_folder'] = st.session_state.pop('next_browse_folder')
-    st.title('Bertini Calculation Studio')
+    st.title('WBE Studio')
     st.caption('Bethe continuation · calculations, progress, and interactive root exploration')
     config = calculation_form()
     live, results, details = st.tabs(['Live calculation', 'Results & roots', 'Run details'])

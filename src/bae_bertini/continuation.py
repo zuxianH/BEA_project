@@ -155,14 +155,17 @@ def validate_rows(input_path, rows, lambda_column):
         )
 
 
-def load_problem(input_path, lambda_column, parameter_symbol, target_value, path_symbol):
+def load_problem(input_path, lambda_column, parameter_symbol, target_value, path_symbol,
+                 lambda_start=None):
+    """Build p(t) from the CSV lambda, or from lambda_start when tracking a path backwards."""
     with input_path.open(newline="") as csv_file:
         rows = list(csv.DictReader(csv_file))
 
     validate_rows(input_path, rows, lambda_column)
 
     variable_names = [row["var"] for row in rows]
-    lambda_start = rows[0][lambda_column]
+    if lambda_start is None:
+        lambda_start = rows[0][lambda_column]
 
     if path_symbol in variable_names:
         raise ValueError(

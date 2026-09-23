@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Bertini Calculation Studio
+Name=WBE Studio
 Comment=Run Bethe calculations and explore interactive plots in your browser
 Exec=/usr/bin/python3 /home/zuxian/Documents/BAE_Bertini/scripts/start_studio.py
 Path=/home/zuxian/Documents/BAE_Bertini

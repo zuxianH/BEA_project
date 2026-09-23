@@ -5,7 +5,7 @@
 
 ## Streamlit / Plotly interface
 
-Launch **Bertini Calculation Studio** in your browser:
+Launch **WBE Studio** in your browser:
 
 ```bash
 .venv/bin/python -m pip install -e '.[ui]'
@@ -28,7 +28,11 @@ connects an idle tab to a run started in another tab. **Stop calculation**
 terminates the process group. Full log downloads are prepared on request.
 
 In **Results & roots**, choose a folder, CSV, and tableau. **Open reference
-results** opens the existing `data/references/` dataset. Plotly supports zoom, pan,
+results** opens the existing `data/references/` dataset. Enable **Plot all tableaux
+in this CSV** to overlay roots from every successful row in the selected file,
+including rows beyond the 500-row preview. Colors identify root levels; hovering
+shows the tableau and CSV row. Skipped unsuccessful or invalid rows are reported.
+Turn this option off to select and compare individual tableaux. Plotly supports zoom, pan,
 hover coordinates, level toggles, and SVG export from its toolbar. Enable
 **Compare with another result** to overlay two rows, optionally as −A versus B.
 The plot uses floating-point display values; **Full precision row** preserves
@@ -127,10 +131,18 @@ python3 -m venv .venv
 Check that Bertini imports:
 
 ```bash
-.venv/bin/python -c "import bertini; print('bertini import ok')"
+.venv/bin/python scripts/continue_lambda0_to_zero.py --help
 ```
 
-The local tested setup uses `bertini2` and imports it in Python as `bertini`.
+The solver extra pins the tested `bertini2==2.0.2`, imported in Python as
+`bertini`. A plain `import bertini` does not check the continuation API. If a
+run reports `No module named 'bertini.function_tree'`, restore the tested version
+in the project environment, then restart the interface:
+
+```bash
+.venv/bin/python -m pip install --force-reinstall 'bertini2==2.0.2'
+.venv/bin/python scripts/continue_lambda0_to_zero.py --help
+```
 
 ## Important Files
 
@@ -365,6 +377,27 @@ bash scripts/crosscheck.sh --tolerance 1e-8 --keep-workdir '{{1,3},{2}}'
 
 The command exits with status `0` when the distance satisfies the tolerance,
 `1` when it does not, and `2` for an input or execution error.
+
+## Reverse Continuation Check
+
+Test whether the continuation is reversible for one SYT. The command solves the
+SYT from `BERTINI_INITIAL_LAMBDA` to `BERTINI_TARGET_LAMBDA`, and then uses the
+target solution as the start point for a continuation back to the starting λ.
+It compares the returned solution with the original starting solution using the
+symmetric Hausdorff distance between the variable values, treated as complex point sets:
+
+```bash
+BERTINI_INITIAL_LAMBDA=100 .venv/bin/python -m bae_bertini.reverse_check \
+  --tolerance 1e-8 '{{1,3},{2}}'
+```
+
+In WBE Studio, choose **Tableau + reverse continuation**. The report shows
+`Distance` (Hausdorff), `MaxVariableDifference` (the matching variable-by-variable
+distance), and `ForwardVsSavedSolution`, which confirms that the reverse leg began
+at the solution saved by the workflow. The forward Bethe-root CSV is saved as
+usual. The report and the forward run files are stored in
+`workspace/runs/reverse-*/`. The exit status is `0` when `Distance` is within the
+tolerance and `1` otherwise.
 
 ## Branch Jump Note
 

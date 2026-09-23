@@ -1,4 +1,4 @@
-"""UI-independent validation and background execution for Bertini Studio."""
+"""UI-independent validation and background execution for WBE Studio."""
 from __future__ import annotations
 
 import ast
@@ -21,7 +21,8 @@ BATCH = dict(INITIAL_LAMBDA='500', TARGET_LAMBDA='0', WORKING_PRECISION='100',
              DEFAULT_PRECISION='100', TRACKING_TOLERANCE='1e-12', INFINITE_TOLERANCE='1e30',
              MAX_PRECISION='1200', MAX_NUM_STEPS='500000', MAX_STEP_SIZE='1/200',
              MAX_NEWTON_ITERATIONS='4', PREDICTOR='RKCashKarp45', INITIAL_STEP_SIZE='', TIMEOUT='900')
-MODES = ('Single tableau', 'Batch: Young diagram', 'Batch: list file', 'Tableau + flip', 'Check saved flips')
+MODES = ('Single tableau', 'Batch: Young diagram', 'Batch: list file', 'Tableau + flip', 'Check saved flips',
+         'Tableau + reverse continuation')
 
 
 def parse_shape(text: str, tableau: bool = False) -> str:
@@ -155,6 +156,9 @@ class Configuration:
             if self.mode == MODES[3]:
                 args = ['bash', str(SCRIPTS / 'crosscheck.sh'), '--tolerance', self.tolerance,
                         '--keep-workdir', parse_shape(self.input, True)]
+            elif self.mode == MODES[5]:
+                args = [str(PYTHON), '-m', 'bae_bertini.reverse_check', '--tolerance', self.tolerance,
+                        parse_shape(self.input, True)]
             else:
                 source = local_path(self.input)
                 if not source.is_file():
@@ -193,9 +197,15 @@ def check_dependencies(require_wolfram=True):
     if require_wolfram and not shutil.which(os.environ.get('WOLFRAM_KERNEL', 'WolframKernel')):
         issues.append('WolframKernel is missing from PATH. Install or configure Mathematica.')
     try:
-        result = subprocess.run([str(PYTHON), '-c', 'import bertini'], capture_output=True, text=True, timeout=20)
+        result = subprocess.run(
+            [str(PYTHON), str(SCRIPTS / 'continue_lambda0_to_zero.py'), '--help'],
+            capture_output=True, text=True, timeout=20)
         if result.returncode:
-            issues.append('The project Python environment cannot import bertini: ' + result.stderr[-1000:])
+            issues.append(
+                'The project Python environment cannot load the Bertini continuation driver. '
+                'This project is tested with bertini2==2.0.2. Repair it with: '
+                f'{shlex.quote(str(PYTHON))} -m pip install --force-reinstall "bertini2==2.0.2"\n'
+                + result.stderr[-1000:])
     except (OSError, subprocess.TimeoutExpired) as exc:
         issues.append(f'Cannot use {PYTHON}: {exc}')
     return issues
