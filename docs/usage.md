@@ -12,11 +12,12 @@ Launch **WBE Studio** in your browser:
 python3 scripts/start_studio.py
 ```
 
-Open <http://localhost:8501> if a browser does not open automatically. The launcher
-binds to `127.0.0.1`. You can also start it directly:
+Open <http://localhost:8501> manually. The launcher does not open a browser by
+default; pass `--server.headless=false` to enable automatic opening. It binds to
+`127.0.0.1`. You can also start it directly:
 
 ```bash
-.venv/bin/python -m streamlit run streamlit_app.py --server.address=127.0.0.1
+.venv/bin/python -m streamlit run streamlit_app.py --server.address=127.0.0.1 --server.headless=true
 ```
 
 The sidebar provides single-tableau runs, batches by Young diagram or uploaded
@@ -26,6 +27,11 @@ the validated command before execution. **Live calculation** refreshes the log
 and status every second during a run, then stops polling. **Refresh run status**
 connects an idle tab to a run started in another tab. **Stop calculation**
 terminates the process group. Full log downloads are prepared on request.
+
+Batch calculations require Bash 4.3 or newer. On macOS, run `brew install bash`
+once, then retry the calculation. The batch launcher automatically uses Homebrew
+Bash from `/opt/homebrew/bin/bash` or `/usr/local/bin/bash` when the system Bash
+is too old, including when Studio was opened without Homebrew on `PATH`.
 
 In **Results & roots**, choose a folder, CSV, and tableau. **Open reference
 results** opens the existing `data/references/` dataset. Enable **Plot all tableaux
@@ -391,12 +397,14 @@ BERTINI_INITIAL_LAMBDA=100 .venv/bin/python -m bae_bertini.reverse_check \
   --tolerance 1e-8 '{{1,3},{2}}'
 ```
 
-In WBE Studio, choose **Tableau + reverse continuation**. The report shows
-`Distance` (Hausdorff), `MaxVariableDifference` (the matching variable-by-variable
-distance), and `ForwardVsSavedSolution`, which confirms that the reverse leg began
-at the solution saved by the workflow. The forward Bethe-root CSV is saved as
-usual. The report and the forward run files are stored in
-`workspace/runs/reverse-*/`. The exit status is `0` when `Distance` is within the
+In WBE Studio, choose **Tableau + reverse continuation**. The reverse leg starts
+from the target solution saved by the forward run, so the forward path is not
+tracked twice. It uses the same tracker settings and `BERTINI_TIMEOUT`. The report
+shows `ReverseStatus`, `Distance` (Hausdorff), and `MaxVariableDifference` (the
+matching variable-by-variable distance). A failed or timed-out reverse leg is reported
+as `Passed=False` without a distance. The forward Bethe-root CSV is saved as
+usual. The report, the reverse input and output CSVs, and the forward run files are
+stored in `workspace/runs/reverse-*/`. The exit status is `0` when `Distance` is within the
 tolerance and `1` otherwise.
 
 ## Branch Jump Note

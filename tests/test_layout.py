@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -20,6 +21,43 @@ spec.loader.exec_module(distribution)
 
 
 class LayoutTests(unittest.TestCase):
+    def test_old_bash_selects_homebrew_and_preserves_arguments(self):
+        old_bash = os.environ.get('BATCH_TEST_OLD_BASH', '/bin/bash')
+        version = subprocess.check_output([old_bash, '-c', 'echo "$BASH_VERSION"'], text=True)
+        if tuple(map(int, version.split('.')[:2])) >= (4, 3):
+            self.skipTest('Set BATCH_TEST_OLD_BASH to Bash 3.2 to exercise the macOS fallback.')
+        modern_bash = shutil.which('bash')
+        probe = subprocess.run([modern_bash, '-c',
+            '((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3)))'])
+        if probe.returncode:
+            self.skipTest('A modern Bash on PATH is needed to test re-execution.')
+        with tempfile.TemporaryDirectory(prefix='batch shell ') as temporary:
+            folder = Path(temporary)
+            script = folder / 'submit_run_single_jobs.sh'
+            shutil.copy(ROOT / 'scripts/paths.sh', folder)
+            apple_bash = folder / 'opt/homebrew/bin/bash'
+            intel_bash = folder / 'usr/local/bin/bash'
+            source = (ROOT / 'scripts/submit_run_single_jobs.sh').read_text()
+            script.write_text(source.replace('/opt/homebrew/bin/bash', str(apple_bash))
+                                    .replace('/usr/local/bin/bash', str(intel_bash)))
+            old_bin = folder / 'bin'
+            old_bin.mkdir()
+            (old_bin / 'bash').symlink_to(old_bash)
+            env = dict(os.environ, PATH=str(old_bin) + ':/usr/bin:/bin')
+            for candidate in (apple_bash, intel_bash):
+                candidate.parent.mkdir(parents=True)
+                candidate.symlink_to(modern_bash)
+                result = subprocess.run([old_bash, str(script), '--help'], env=env,
+                                        capture_output=True, text=True, timeout=10)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn('Usage:', result.stdout)
+                candidate.unlink()
+            result = subprocess.run([old_bash, str(script), '--help'], env=env,
+                                    capture_output=True, text=True, timeout=10)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('brew install bash', result.stderr)
+            self.assertNotIn('declare:', result.stderr)
+
     def test_bundle_is_relocatable_and_excludes_local_state(self):
         with tempfile.TemporaryDirectory(prefix='bertini bundle ') as temporary:
             folder = Path(temporary)

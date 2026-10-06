@@ -23,7 +23,7 @@ def distribution_files(root=ROOT):
         'data/tableaux': {'.txt'},
     }.items():
         for path in (root / directory).rglob('*'):
-            if path.is_file() and not path.is_symlink() and path.suffix in suffixes and '__pycache__' not in path.parts:
+            if path.is_file() and not path.is_symlink() and path.suffix in suffixes and not {'__pycache__', '.venv'} & set(path.parts):
                 files[str(path.relative_to(root))] = path
     for name in ('all_SYT_{3,2,1}.csv', 'all_SYT_{4,2,1}.csv'):
         path = root / 'data/references' / name

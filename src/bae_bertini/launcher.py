@@ -14,6 +14,7 @@ def main():
     os.chdir(root)
     os.execv(str(python), [str(python), '-m', 'streamlit', 'run',
                           str(root / 'streamlit_app.py'), '--server.address=127.0.0.1',
+                          '--server.headless=true',
                           '--browser.gatherUsageStats=false', *sys.argv[1:]])
 
 

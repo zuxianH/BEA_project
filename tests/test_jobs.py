@@ -55,14 +55,29 @@ class InputTests(unittest.TestCase):
         self.assertEqual(args[1:], ['-m', 'bae_bertini.reverse_check', '--tolerance', '1e-8', '{{1,3},{2}}'])
         self.assertEqual(env['BERTINI_INITIAL_LAMBDA'], BATCH['INITIAL_LAMBDA'])
 
-    def test_reverse_continuation_returns_to_start(self):
+    def reverse_check(self, **settings):
         from bae_bertini.reverse_check import reverse_check
-        with tempfile.TemporaryDirectory() as directory:
-            source = Path(directory) / 'initial_data.csv'
-            source.write_text('syt,lambda0,var,Initialvar,expression\n"{{1}}",4,x,2,x**2 - h\n')
-            lines, passed = reverse_check(source, '1', '1e-6')
+        # x**2 = h: the start x=2 at h=4 continues to the saved solution x=1 at h=1.
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.dict(os.environ, {'BERTINI_' + k: v for k, v in settings.items()}):
+            work = Path(directory)
+            (work / 'initial_data.csv').write_text(
+                'syt,lambda0,var,Initialvar,expression\n"{{1}}",4,x,2,x**2 - h\n')
+            (work / 'output.csv').write_text('var,b_final_value\nx,1\n')
+            return reverse_check(work / 'initial_data.csv', '1', '1e-6', work)
+
+    def test_reverse_continuation_returns_to_start(self):
+        lines, passed = self.reverse_check()
         self.assertTrue(passed)
         self.assertIn('Path=lambda 4 -> 1 -> 4', lines)
+        self.assertIn('ReverseStatus=Success', lines)
+
+    def test_reverse_continuation_failure_is_reported(self):
+        lines, passed = self.reverse_check(MAX_NUM_STEPS='1')
+        self.assertFalse(passed)
+        self.assertIn('Passed=False', lines)
+        self.assertFalse(any(line.startswith('Distance=') for line in lines))
+        self.assertTrue(any(line.startswith('ReverseStatus=') and 'Success' not in line for line in lines))
 
     def test_batch_partitions_and_rerun(self):
         args, _ = Configuration(mode=MODES[1], input='{3,2,1}', jobs='2', partition='3', parts='9', rerun=True).command()

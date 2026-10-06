@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# macOS ships Bash 3.2; associative arrays and wait -n require Bash 4.3+.
+if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 3))); then
+  for batch_bash in "$(command -v bash)" "/opt/homebrew/bin/bash" "/usr/local/bin/bash"; do
+    if [[ -x "$batch_bash" ]] && "$batch_bash" -c \
+      '((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3)))'; then
+      exec "$batch_bash" "$0" "$@"
+    fi
+  done
+  printf 'Error: batch calculations require Bash 4.3 or newer (running %s).\n' "$BASH_VERSION" >&2
+  printf 'On macOS, install it with: brew install bash\nThen retry the calculation in Studio.\n' >&2
+  exit 1
+fi
+
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/paths.sh"
 WOLFRAM_KERNEL="${WOLFRAM_KERNEL:-WolframKernel}"
 RUN_SINGLE="$ROOT_DIR/wolfram/RunSingle.wl"
