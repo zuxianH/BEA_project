@@ -189,6 +189,21 @@ ClearAll[SUSYWBEProgressPrint];
 SetAttributes[SUSYWBEProgressPrint, HoldAll];
 SUSYWBEProgressPrint[args___] := If[! TrueQ[$SUSYWBEMuteProgress], Print[args]];
 
+ClearAll[SUSYWBEStagePrint, SUSYWBETableauText];
+SetAttributes[SUSYWBEStagePrint, HoldAll];
+SUSYWBEStagePrint[args___] := If[Environment["BAE_STUDIO_TERMINAL"] === "1",
+  WriteString[$Output, StringJoin[ToString[#, OutputForm] & /@ {args}], "\n"]
+];
+SUSYWBETableauText[tableau_List] := Module[{width, border, rows},
+  width = StringLength[ToString[Max[Flatten[tableau]]]] + 2;
+  border[row_] := "+" <> StringRiffle[Table[StringRepeat["-", width], {Length[row]}], "+"] <> "+";
+  rows = Flatten[Table[{
+    "|" <> StringRiffle[(" " <> StringPadRight[ToString[#], width - 1]) & /@ row, "|"] <> "|",
+    border[row]
+  }, {row, tableau}]];
+  StringRiffle[Prepend[rows, border[First[tableau]]], "\n"]
+];
+
 
 ClearAll[EnsureSUSYWBEDirectory];
 EnsureSUSYWBEDirectory[path_String] := Module[{expandedPath},
@@ -1177,6 +1192,7 @@ RunSingleSYT[tableau_List, opts : OptionsPattern[]] := Module[
     failureReason = If[succeededQ, None, "Solver returned no solution history"];
     betheRoots = If[
       succeededQ,
+      SUSYWBEStagePrint["Extracting Bethe roots..."];
       ExtractBetheRootsFromSolutionHistory[solutionHistory, youngDiagram],
       Missing["SolverFailed", failureReason]
     ];

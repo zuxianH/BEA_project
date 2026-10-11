@@ -113,7 +113,7 @@ class Configuration:
         if int(env['BERTINI_MAX_PRECISION']) < int(env['BERTINI_DEFAULT_PRECISION']):
             raise ValueError('Maximum precision must be at least the Bertini precision.')
         env.update(BERTINI_RESULT_SYT_DIR=str(destination), CROSSCHECK_RESULT_SYT_DIR=str(destination),
-                   PYTHONUNBUFFERED='1',
+                   PYTHONUNBUFFERED='1', BAE_STUDIO_TERMINAL='1',
                    PYTHONPATH=str(ROOT / 'src') + os.pathsep + os.environ.get('PYTHONPATH', ''))
         kernel = os.environ.get('WOLFRAM_KERNEL', 'WolframKernel')
         env['WOLFRAM_KERNEL'] = kernel

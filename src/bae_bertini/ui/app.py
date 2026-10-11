@@ -12,7 +12,8 @@ from bae_bertini.config import BATCH, MODES, PREDICTORS, Configuration, preview
 from bae_bertini.paths import ROOT, STATE, REFERENCES
 from bae_bertini.results import read_results
 from bae_bertini.ui.plots import root_figure, all_roots_figure
-from bae_bertini.jobs import RunManager, local_path
+from bae_bertini.jobs import RunManager, failure_hint, local_path
+from bae_bertini.ui.live import show_log
 
 
 @st.cache_resource
@@ -153,20 +154,24 @@ def live_run():
         st.info('Ready. Set up a calculation in the sidebar, or explore saved results.')
         return
     left, right = st.columns([4, 1])
-    elapsed = int(state.elapsed)
+    elapsed = f'{state.elapsed:.3f} s'
     if state.running:
-        left.info(f'{"Stopping…" if state.cancelled else "Running"} · {elapsed // 60:02d}:{elapsed % 60:02d} elapsed')
+        left.info(f'{"Stopping…" if state.cancelled else "Running"} · {elapsed} elapsed')
     elif state.cancelled:
         left.warning('Stopped. Completed outputs and pending batch snapshots are retained.')
     elif state.code == 0:
-        left.success(f'Finished successfully · {elapsed // 60:02d}:{elapsed % 60:02d}')
+        left.success(f'Finished successfully · {elapsed}')
     else:
         left.error(f'Finished with exit code {state.code}. Check the log below.')
+        if not state.issues and not any(record.status == 'failed' for record in state.tableaux):
+            st.error(failure_hint(state.output))
+    for issue in state.issues:
+        st.error('Batch error: ' + issue)
     if right.button('Stop calculation', disabled=not state.running or state.cancelled):
         manager.stop()
         st.rerun()
     st.caption(f'Results: {state.destination}')
-    st.code(state.output or 'Starting calculation…', language='text', height=330)
+    show_log(state)
     st.caption(f'Live view shows the recent log. Full log: {state.log_path}')
     if not state.running and state.log_path.exists():
         if st.checkbox('Prepare full log download', key='prepare_log_' + str(state.log_path)):

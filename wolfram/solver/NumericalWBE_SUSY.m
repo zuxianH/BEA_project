@@ -1596,17 +1596,26 @@ SolutionFromSYTUptdStart[SYT_] := Block[{
   
   \[Lambda]Tstart = SYT;
   \[Lambda]start = \[Lambda]Tstart // ToYD;
+  SUSYWBEStagePrint["Initial calculation: ", ToString[SYT, InputForm], "\n", SUSYWBETableauText[SYT]];
+  SUSYWBEStagePrint["Generating equation system..."];
   
   (* GenerateSUSYWsystem initializes the Q-system itself. *)
   generateQsystemSeconds = 0;
   generateSUSYWsystemSeconds = First@AbsoluteTiming[GenerateSUSYWsystem[\[Lambda]start]];
+  SUSYWBEStagePrint["Equation system: ", ToString[NumberForm[generateSUSYWsystemSeconds, {12, 3}]], " s"];
+  SUSYWBEStagePrint["Preparing large-Lambda expansion..."];
   largeLambdaExpansionSeconds = First@AbsoluteTiming[Large\[CapitalLambda]ExpansionUptdStart[\[Lambda]Tstart]];
+  SUSYWBEStagePrint["Large-Lambda expansion: ", ToString[NumberForm[largeLambdaExpansionSeconds, {12, 3}]], " s"];
+  SUSYWBEStagePrint["Generating initial solutions..."];
   generateAsymptoticSolutionsSeconds = First@AbsoluteTiming[GenerateSolsFromAsymptoticsUptdStart[\[Lambda]start]];
+  SUSYWBEStagePrint["Initial solutions: ", ToString[NumberForm[generateAsymptoticSolutionsSeconds, {12, 3}]], " s"];
   
   \[CapitalLambda]vals = \[CapitalLambda]vals0;
   
   
+  SUSYWBEStagePrint["Solving initial tableau..."];
   iteratorSeconds = First@AbsoluteTiming[IterateUptdStart[\[Lambda]Tstart]];
+  SUSYWBEStagePrint["Initial solve: ", ToString[NumberForm[iteratorSeconds, {12, 3}]], " s"];
   
   finalizeSolutionSeconds = First@AbsoluteTiming[
     currentsol = {
@@ -1635,6 +1644,7 @@ SolutionFromSYTUptdStart[SYT_] := Block[{
     "TotalStageSeconds" -> totalStageSeconds,
     "WorkflowTimingMeasuredQ" -> True
   |>];
+  SUSYWBEStagePrint["Subtableau complete: ", ToString[NumberForm[totalStageSeconds, {12, 3}]], " s\n"];
   currentsol
 ]
 
@@ -1659,12 +1669,19 @@ SolutionFromSYTUptdInterim[SYTcurrent_, SYTlast_, solnlast_] := Block[{
   
   \[Lambda]current = \[Lambda]Tcurrent // ToYD;
   \[Lambda]last = \[Lambda]Tlast // ToYD;
+  SUSYWBEStagePrint["Next subtableau: ", ToString[SYTcurrent, InputForm], "\n", SUSYWBETableauText[SYTcurrent]];
+  SUSYWBEStagePrint["Generating equation system..."];
   
   (* GenerateSUSYWsystem initializes the Q-system itself. *)
   generateQsystemSeconds = 0;
   generateSUSYWsystemSeconds = First@AbsoluteTiming[GenerateSUSYWsystem[\[Lambda]current]];
+  SUSYWBEStagePrint["Equation system: ", ToString[NumberForm[generateSUSYWsystemSeconds, {12, 3}]], " s"];
+  SUSYWBEStagePrint["Preparing large-Lambda expansion..."];
   largeLambdaExpansionSeconds = First@AbsoluteTiming[Large\[CapitalLambda]ExpansionUptdInterim[\[Lambda]Tcurrent, \[Lambda]Tlast, solnlast]];
+  SUSYWBEStagePrint["Large-Lambda expansion: ", ToString[NumberForm[largeLambdaExpansionSeconds, {12, 3}]], " s"];
+  SUSYWBEStagePrint["Generating initial solutions..."];
   generateAsymptoticSolutionsSeconds = First@AbsoluteTiming[GenerateSolsFromAsymptoticsUptdInterim[\[Lambda]current, \[Lambda]last, solnlast]];
+  SUSYWBEStagePrint["Initial solutions: ", ToString[NumberForm[generateAsymptoticSolutionsSeconds, {12, 3}]], " s"];
   
   \[CapitalLambda]vals = \[CapitalLambda]vals0;
   
@@ -1672,7 +1689,9 @@ SolutionFromSYTUptdInterim[SYTcurrent_, SYTlast_, solnlast_] := Block[{
   
   SUSYWBEProgressPrint["startJulia: ", SYTcurrent];
   (*IterateUptdInterim[\[Lambda]Tcurrent];*)
+  SUSYWBEStagePrint["Continuing to the next solution..."];
   iteratorSeconds = First@AbsoluteTiming[$CurrentIterator[\[Lambda]Tcurrent]];
+  SUSYWBEStagePrint["Continuation: ", ToString[NumberForm[iteratorSeconds, {12, 3}]], " s"];
   
 
   
@@ -1705,6 +1724,7 @@ SolutionFromSYTUptdInterim[SYTcurrent_, SYTlast_, solnlast_] := Block[{
     "TotalStageSeconds" -> totalStageSeconds,
     "WorkflowTimingMeasuredQ" -> True
   |>];
+  SUSYWBEStagePrint["Subtableau complete: ", ToString[NumberForm[totalStageSeconds, {12, 3}]], " s\n"];
   currentsol
 ]
 
@@ -1718,6 +1738,7 @@ SolutionFromSYTUptdStepwiseWronskian[SYT_] := Catch[
     StepsStepwise = {};
     ansWholeIteration = {};
     predictorCorrectorList = {};
+    SUSYWBEStagePrint["Preparing subtableau sequence..."];
     
     buildTableauSequenceSeconds = First@AbsoluteTiming[
       \[Lambda]Tlist = Table[
@@ -1733,6 +1754,8 @@ SolutionFromSYTUptdStepwiseWronskian[SYT_] := Catch[
       "BuildTableauSequenceSeconds" -> buildTableauSequenceSeconds,
       "WorkflowTimingMeasuredQ" -> True
     |>];
+    SUSYWBEStagePrint["Subtableau sequence: ", Length[\[Lambda]Tlist], " stages (",
+      ToString[NumberForm[buildTableauSequenceSeconds, {12, 3}]], " s)"];
     
     SolutionFromSYTUptdStart[\[Lambda]Tlist[[1]]];
     AppendTo[StepsStepwise, {

@@ -46,6 +46,7 @@ class InputTests(unittest.TestCase):
     def test_single_script_settings_and_destination(self):
         config = Configuration()
         args, env = config.command()
+        self.assertEqual(env['BAE_STUDIO_TERMINAL'], '1')
         self.assertEqual(args[-1], '{{1,3},{2}}')
         self.assertEqual(env['BERTINI_MAX_STEP_SIZE'], '1/200')
         self.assertEqual(env['BERTINI_RESULT_SYT_DIR'], env['CROSSCHECK_RESULT_SYT_DIR'])

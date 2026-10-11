@@ -28,6 +28,18 @@ and status every second during a run, then stops polling. **Refresh run status**
 connects an idle tab to a run started in another tab. **Stop calculation**
 terminates the process group. Full log downloads are prepared on request.
 
+The live view is a single **Calculation terminal**. It shows the initial calculation,
+each subtableau as a text diagram, and elapsed seconds for equation generation,
+large-Lambda expansion, initial solutions, and continuation. Each subtableau ends
+with its total calculation time before the next diagram appears.
+
+Batch worker stdout and stderr stream into the same terminal, labelled by entry
+number. Completion lines include elapsed time and failures include their original
+diagnostics. Stderr alone does not imply failure. The terminal keeps a bounded
+recent view; **Download full log** includes the complete run. Worker logs and the
+lifecycle journal are also retained alongside the main log.
+Ordinary batch commands continue to work without these Studio events.
+
 Batch calculations require Bash 4.3 or newer. On macOS, run `brew install bash`
 once, then retry the calculation. The batch launcher automatically uses Homebrew
 Bash from `/opt/homebrew/bin/bash` or `/usr/local/bin/bash` when the system Bash

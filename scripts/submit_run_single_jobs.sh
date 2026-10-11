@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# macOS ships Bash 3.2; associative arrays and wait -n require Bash 4.3+.
+# macOS ships Bash 3.2; this batch runtime uses associative arrays and supports Bash 4.3+.
 if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 3))); then
   for batch_bash in "$(command -v bash)" "/opt/homebrew/bin/bash" "/usr/local/bin/bash"; do
     if [[ -x "$batch_bash" ]] && "$batch_bash" -c \
@@ -475,8 +475,12 @@ PY
 }
 
 merge_completed_results() {
-  "$PYTHON_EXECUTABLE" -m bae_bertini.results \
-    "$JOB_RESULT_DIR" "$YD" "$AGGREGATE_RESULT_FILE" "$FAIL_RESULT_FILE"
+  if "$PYTHON_EXECUTABLE" -m bae_bertini.results \
+    "$JOB_RESULT_DIR" "$YD" "$AGGREGATE_RESULT_FILE" "$FAIL_RESULT_FILE"; then
+    return 0
+  fi
+  studio_event error 'Aggregate result merge failed. Inspect the calculation log; worker outputs are retained.'
+  return 1
 }
 
 maybe_merge_completed_results() {
@@ -487,6 +491,25 @@ maybe_merge_completed_results() {
     completed_since_merge=0
     last_merge_seconds=$SECONDS
   fi
+}
+
+studio_event() {
+  [[ -n "${BAE_STUDIO_EVENTS_FILE:-}" ]] || return 0
+  "$PYTHON_EXECUTABLE" -m bae_bertini.run_events "$@"
+}
+
+reap_completed_jobs() {
+  local pid
+  for pid in "${!worker_pids[@]}"; do
+    if ! kill -0 "$pid" 2>/dev/null; then
+      if ! wait "$pid"; then
+        failures=$((failures + 1))
+      fi
+      unset 'worker_pids[$pid]'
+      running_jobs=$((running_jobs - 1))
+      completed_since_merge=$((completed_since_merge + 1))
+    fi
+  done
 }
 
 while (($#)); do
@@ -630,6 +653,10 @@ if [[ -n "$PART_INDEX" ]]; then
   fi
 fi
 
+if ((!DRY_RUN)); then
+  studio_event plan "$LIST_FILE" "$PART_START" "$PART_END"
+fi
+
 printf 'Target YD: %s\n' "$YD"
 printf 'SYT list: %s\n' "$LIST_FILE"
 printf 'SYT entries in list: %d\n' "$TOTAL_LIST_ENTRIES"
@@ -666,6 +693,8 @@ completed_since_merge=0
 last_merge_seconds=$SECONDS
 
 declare -A scheduled_tableaux=()
+declare -A worker_pids=()
+running_jobs=0
 
 while IFS= read -r syt || [[ -n "$syt" ]]; do
   line_number=$((line_number + 1))
@@ -682,6 +711,7 @@ while IFS= read -r syt || [[ -n "$syt" ]]; do
   if ((SKIP_EXISTING)) && [[ -n "${completed_tableaux[$syt_key]+x}" ]]; then
     printf 'Skipping existing solved SYT in %s: %s\n' "$AGGREGATE_RESULT_FILE" "$syt"
     skipped=$((skipped + 1))
+    if ((!DRY_RUN)); then studio_event skip "$entry_number" "$syt" 'Previously solved'; fi
     continue
   fi
 
@@ -689,18 +719,22 @@ while IFS= read -r syt || [[ -n "$syt" ]]; do
     printf 'Skipping existing failed SYT in %s: %s\n' "$FAIL_RESULT_FILE" "$syt"
     skipped=$((skipped + 1))
     skipped_failed=$((skipped_failed + 1))
+    if ((!DRY_RUN)); then studio_event skip "$entry_number" "$syt" 'Previously failed'; fi
     continue
   fi
 
   if [[ -n "${scheduled_tableaux[$syt_key]+x}" ]]; then
     printf 'Skipping duplicate SYT entry on line %d: %s\n' "$line_number" "$syt"
     skipped=$((skipped + 1))
+    if ((!DRY_RUN)); then studio_event skip "$entry_number" "$syt" 'Duplicate input entry'; fi
     continue
   fi
   scheduled_tableaux["$syt_key"]=1
 
   submitted=$((submitted + 1))
   job_id="$(printf '%05d' "$submitted")"
+  stdout_log=""
+  stderr_log=""
   if ((LOGS_ENABLED)); then
     stdout_log="$LOG_DIR/${job_id}.out"
     stderr_log="$LOG_DIR/${job_id}.err"
@@ -713,19 +747,23 @@ while IFS= read -r syt || [[ -n "$syt" ]]; do
     continue
   fi
 
-  while (( $(jobs -pr | wc -l) >= MAX_JOBS )); do
-    if ! wait -n; then
-      failures=$((failures + 1))
-    fi
-    completed_since_merge=$((completed_since_merge + 1))
+  reap_completed_jobs
+  while ((running_jobs >= MAX_JOBS)); do
+    sleep .1
+    reap_completed_jobs
   done
 
   printf 'Submitting job %s from line %d entry %d: %s\n' "$job_id" "$line_number" "$entry_number" "$syt"
-  if ((LOGS_ENABLED)); then
+  if [[ -n "${BAE_STUDIO_EVENTS_FILE:-}" ]]; then
+    "$PYTHON_EXECUTABLE" -m bae_bertini.run_events worker "$entry_number" "$job_id" "$syt" \
+      "$stdout_log" "$stderr_log" -- "${cmd[@]}" &
+  elif ((LOGS_ENABLED)); then
     "${cmd[@]}" > "$stdout_log" 2> "$stderr_log" &
   else
     "${cmd[@]}" >/dev/null 2>&1 &
   fi
+  worker_pids[$!]=1
+  running_jobs=$((running_jobs + 1))
   # Refill the worker slot before periodically consolidating completed results.
   maybe_merge_completed_results
 done < "$LIST_FILE"
@@ -738,12 +776,10 @@ if ((DRY_RUN)); then
   exit 0
 fi
 
-while (( $(jobs -pr | wc -l) > 0 )); do
-  if ! wait -n; then
-    failures=$((failures + 1))
-  fi
-  completed_since_merge=$((completed_since_merge + 1))
+while ((running_jobs > 0)); do
+  reap_completed_jobs
   maybe_merge_completed_results
+  if ((running_jobs > 0)); then sleep .1; fi
 done
 
 if ! merge_completed_results; then
