@@ -117,6 +117,7 @@ From the repository root:
 .venv/bin/python -m unittest discover -s tests -v
 WolframKernel -noprompt -script tests/test_precision.wl
 WolframKernel -noprompt -script tests/test_asymptotic_start.wl
+WolframKernel -noprompt -script tests/test_marked_point_selector.wl
 python3 tests/validate_reference_results.py --limit 1 --jobs 1 \
   --output-dir /tmp/bertini-check-321 'data/references/all_SYT_{3,2,1}.csv'
 python3 tests/validate_reference_results.py --limit 1 --jobs 1 \
@@ -173,6 +174,14 @@ in the project environment, then restart the interface:
 - `notebooks/plot_bethe_roots.ipynb`: notebook for plotting `BetheRoots` and comparing `-r1` with `r2`.
 
 ## Run One SYT Job
+
+Runs choose the diagonal marked point `mP = {d,d}`, where `d` is the size of
+the largest square in the current Young diagram (its Durfee square). The choice
+is recomputed for each subtableau: `{4,2,1}` uses `{2,2}`, and `{9,4,3,2,1}` uses
+`{3,3}`. This deterministic rule gave the fastest measured symbolic setup in
+the tested diagrams; it is not a guarantee of globally optimal runtime.
+Direct Wolfram workflows can select the previous bosonic rule with
+`SetMarkedPointSelector[UseLeftmostBosonicMarkedPoint]`.
 
 Basic command:
 

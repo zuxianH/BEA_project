@@ -22,6 +22,9 @@ LoadSUSYWBEProjectDependencies::usage =
 UseLeftmostBosonicMarkedPoint::usage =
   "UseLeftmostBosonicMarkedPoint[yd] chooses the deterministic marked point {Length[yd], 0}.";
 
+UseDiagonalMarkedPoint::usage =
+  "UseDiagonalMarkedPoint[yd] chooses {d, d}, where d is the Durfee-square size of yd.";
+
 UseRandomMaximalMarkedPoint::usage =
   "UseRandomMaximalMarkedPoint[yd] chooses a random maximal admissible marked point with a > s.";
 
@@ -250,6 +253,10 @@ LoadSUSYWBEProjectDependencies[];
 
 UseLeftmostBosonicMarkedPoint[yd_List] := {Length[yd], 0};
 
+UseDiagonalMarkedPoint[yd_List] := With[
+  {d = Count[MapIndexed[#1 >= First[#2] &, yd], True]}, {d, d}
+];
+
 UseRandomMaximalMarkedPoint[yd_List] := RandomSample[
   MaximalBy[Select[Endpoints[yd], #[[1]] > #[[2]] &], Total],
   1
@@ -261,7 +268,7 @@ UseRandomMinimalMarkedPoint[yd_List] := RandomSample[
 ][[1]];
 
 
-SetMarkedPointSelector[selector_ : UseLeftmostBosonicMarkedPoint] := Module[{},
+SetMarkedPointSelector[selector_ : UseDiagonalMarkedPoint] := Module[{},
   ClearAll[mPfunction];
   mPfunction[yd_] := selector[yd];
   $SUSYWBEMarkedPointSelector = selector;

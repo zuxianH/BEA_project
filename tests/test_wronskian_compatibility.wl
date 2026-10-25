@@ -5,7 +5,7 @@ assert[condition_, label_] := If[! TrueQ[condition], Print["FAIL: ", label]; Exi
 loaded = Check[Get[FileNameJoin[{project, "wolfram", "SUSYWBEWorkflow.wl"}]]; True, False];
 assert[loaded, "solver loads without errors"];
 
-(* Check purely bosonic and mixed marked points for {4,2,1}. *)
+(* Check bosonic, diagonal, and both orientations of mixed marked points. *)
 Do[
   yd = {4, 2, 1};
   wronskian = GenerateSusyWronskian[point, yd]["SusyWronskian"];
@@ -26,7 +26,7 @@ Do[
   assert[AllTrue[Simplify[(variables /. forward /. backward /. symRules) - variables], # === 0 &],
     "SUSY coefficients survive a consistent round trip"];
   Print["PASS: ", yd, " at ", point];
-  , {point, {{3, 0}, {2, 1}}}
+  , {point, {{3, 0}, {2, 1}, {2, 2}, {1, 2}}}
 ];
 Print["All Wronskian compatibility checks passed."];
 Exit[0];

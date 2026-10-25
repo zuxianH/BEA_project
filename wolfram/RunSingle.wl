@@ -374,7 +374,7 @@ SaveIntermediateSubSYTResults[subResults_List, resultDirectory_String] := Module
 ];
 
 
-SetMarkedPointSelector[UseLeftmostBosonicMarkedPoint];
+SetMarkedPointSelector[UseDiagonalMarkedPoint];
 SetSingleSYTRunConfiguration[
   InitialLambda -> BertiniEnvNumber["BERTINI_INITIAL_LAMBDA", 70],
   TargetLambda -> BertiniEnvNumber["BERTINI_TARGET_LAMBDA", 0],
