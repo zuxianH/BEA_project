@@ -128,7 +128,7 @@ lambdaMarked[yd_, markedPoint_] := Module[
 	/.If[noIndices[[1]]>=noIndices[[2]],
 	{\[Nu][i_]/;i>a:>{},\[Nu][i_]:>{mP[[2]]-i+1},\[Mu][i_]:>{#[[i]]},sign->Signature[#]}&/@Permutations[Range[cP[[1]]+1,mP[[1]]]]
 	,
-	{\[Mu][i_]/;i>a:>{},\[Mu][i_]:>{mP[[1]]-i+1},\[Nu][i_]:>{#[[i]]},sign->Signature[#]}&/@Permutations[Range[cP[[2]]+1,mP[[2]]]]])
+	{\[Mu][i_]/;i>a:>{},\[Mu][i_]:>{mP[[1]]-i+1},\[Nu][i_]:>{#[[i]]},sign->Signature[#]}&/@Permutations[Range[cP[[2]]+1,mP[[2]]]]])];
 
 
 (*THOMAS UDPDATED: new SusyWronskian using WGrassmann; made table allCoeffs*)
@@ -202,13 +202,13 @@ GenerateSusyWronskian[mP_, YD_] :=
         Abort[]
       ];
 
-      coeffs[{a}, {i}] = First@sol;
+      coeffs[{a}, {i}] = First@sol
     ],
     {a, 1, \[Lambda]}, {i, 1, \[Nu]}
   ]//Flatten;
 
   (*THOMAS UPDATED*)  
-  SusyWronskian=Getmonic@(WGrassman[{0,0},mP]/.Qlocal[n_][A_,J_]:>(Q[A,J]/.u->u+\[HBar]/2 n)/.\[HBar]->I)/.allCoeffs//CoefficientList[#,u]&//Simplify;
+  SusyWronskian=Getmonic@(WGrassman[{0,0},mP]/.Qlocal[n_][A_,J_]:>(Q[A,J]/.u->u+\[HBar]/2 n)/.\[HBar]->I)/.allCoeffs//Simplify;
 
   YQ\[Theta][0, 0, YD] := Product[u - \[Theta][i], {i, Total[YD]}];
 
@@ -398,7 +398,7 @@ ComputesQQDomainOfInterested[yd_List, mP_List] := Module[
 Computec2susyCoefficientsv2[yd_, mP_] := Module[
   {indices, allTaggedEqns, allEqnsOnly, allCVars, knownVars, 
    remainingCVars, selectedPairs, candidates, bestPair, foundVar, 
-   finalEqns, cSolution},
+   finalEqns, cSolution, allCoeffs = GenerateSusyWronskian[mP, yd]["AllCoeffs"]},
   
   (* 1. Generate indices based on mP (excluding {0,0}) *)
   
@@ -412,13 +412,13 @@ Computec2susyCoefficientsv2[yd_, mP_] := Module[
 	        -
 	        Getmonic@(
 	        WGrassman[{idx[[1]],idx[[2]]},mP]
-	        /.Qlocal[n_][A_,J_]:>(Q[A,J]/.u->u+\[HBar]/2 n)/.\[HBar]->I), 
+	        /.Qlocal[n_][A_,J_]:>(Q[A,J]/.u->u+\[HBar]/2 n)/.\[HBar]->I/.allCoeffs),
 	        u
 	      ]
 	  ,{idx,indices}]];
       
   (* 3. Solve equations *)
-  allEqnsOnly = allTaggedEqns[[All, 2]];
+  allEqnsOnly = allTaggedEqns;
   
   allCVars = Union[Cases[Variables[allEqnsOnly], c[__]]];
   
@@ -561,7 +561,7 @@ Computesusy2cCoefficientsv2[yd_List, mP_List] := Module[
 (*THOMAS UPDATED: new iterative algorithm*)
 (* Function Definition *)
 Computesusy2cCoefficientsv3[YD_, mP_] := Module[
-  {eqsBetF,knownSUSYc},
+  {eqsBetF,knownSUSYc,allCoeffs = GenerateSusyWronskian[mP, YD]["AllCoeffs"]},
   
 (*Find SUSYc[{},{i}][n] and SUSYc[{a},{}][n]*)
 (*find equations on the variables by moving in the bosonic or fermionic direction*)

@@ -668,7 +668,7 @@ cleanVars = ToString /@ convertVars;
 MyFindRoot;
 MYminsolrep;
 (*initb = Values[sol[\[CapitalLambda]0]];*)
-initb = (MYminsolrep//Values);
+initb = susyvars /. MYminsolrep;
 (*initb = Values[sol[\[CapitalLambda]0]];*)
 cleanInitb = ToString[N[#, prec], InputForm] & /@ initb;
 cleanInitb = StringReplace[#, "*^" -> "*10^"] & /@ cleanInitb;
